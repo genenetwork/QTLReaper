@@ -787,7 +787,8 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
     FILE *fp;  
     long lSize;
     char * buffer;
-    char tempchar[20], tempchar2[20];
+    // was tempchar[20], tempchar2[20], and we want to change to longer locus name. We guess this will be 100 characters.
+    char tempchar[100], tempchar2[100];
     char mat[20], pat[20], het[20], unk[20];
     PyObject *file=NULL;
     char *filename;
@@ -933,7 +934,8 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  						cptr = (Chromosome *)(self->chromosome[self->size]);
  						Py_DECREF(cptr->name);
  						cptr->name = PyString_FromString(tempchar); 
- 						cptr->loci = (PyObject **)malloc(500*sizeof(PyObject *)); 
+						// For each chromosome, the limit of markers was 500, and now it is 10000.
+ 						cptr->loci = (PyObject **)malloc(10000*sizeof(PyObject *)); 
  						self->size += 1;
  					}
  				}
