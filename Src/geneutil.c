@@ -295,7 +295,9 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 	op->loci = (PyObject **)malloc(MAX_LOCI*sizeof(PyObject *));
 	//printf("\n\nChr %s\n", PyString_AsString(chr->name));
 	for (i = 0; i < chr->size; i++){
-
+          if (i >= MAX_LOCI)
+            PyErr_SetString(PyExc_SystemError,
+                            "Memory error for MAX_LOCI");
 		curLocus = (Locus *)(chr->loci[i]);
 		chrName = PyString_AsString(curLocus->chr);
 		curCM = curLocus->cM;
