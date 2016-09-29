@@ -924,7 +924,9 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				while (buffer[i] != '\0' && buffer[i] != '\t')
  					i++;
  				if (buffer[i] == '\0' && i == k)
- 					break;
+                                       break;
+                                if (i-k>MARKERNAME_SIZE-1)
+                                        error(2,EINVAL,"Memory error for marker name <%s>",buffer+k);
  				j += 1;
  				if (j == 1){
  					if (strncmp(buffer+k, tempchar, i-k) != 0){
