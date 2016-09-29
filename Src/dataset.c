@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with QTL Reaper; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include <Python.h>
@@ -41,7 +41,7 @@ Dataset_traverse(Dataset *self, visitproc visit, void *arg)
 {
 	int i, err;
 	PyObject *x;
-	
+
     if (self->name && visit(self->name, arg) < 0)
         return -1;
     if (self->mat && visit(self->mat, arg) < 0)
@@ -72,21 +72,21 @@ Dataset_dealloc(Dataset* self)
 	PyObject_GC_UnTrack(self);
 	Py_TRASHCAN_SAFE_BEGIN(self);
     Py_XDECREF(self->name);
-    
+
     if (self->chromosome != NULL){
     	for (i=0;i<self->size;i++){
     		Py_XDECREF(self->chromosome[i]);
     	}
     	free(self->chromosome);
     }
-    
+
     if (self->prgy != NULL){
     	for (i=0;i<self->nprgy;i++){
     		free(self->prgy[i]);
     	}
     	free(self->prgy);
     }
-    
+
     self->ob_type->tp_free((PyObject*)self);
 	Py_TRASHCAN_SAFE_END(self)
 }
@@ -102,15 +102,15 @@ Dataset_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         self->mat = PyString_FromString("mat");
         self->pat = PyString_FromString("pat");
         self->type = PyString_FromString("riset");
-        if (self->name == NULL || self->mat == NULL 
+        if (self->name == NULL || self->mat == NULL
         	||self->pat == NULL ||self->type == NULL)
           {
             Py_DECREF(self);
             return NULL;
           }
-        
+
         self->chromosome = NULL;
-        self->size = 0;   
+        self->size = 0;
         self->prgy = NULL;
         self->nprgy = 0;
         self->parentsf1 = 0;
@@ -129,9 +129,9 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
 
     static char *kwlist[] = {"name", "chromosome",NULL};
 
-    if (! PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist, 
+    if (! PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist,
                                       &name, &chromosome))
-        return -1; 
+        return -1;
 
     if (name){
     	if (PyString_Check(name)) {
@@ -140,7 +140,7 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
         self->name = name;
       }
       else{
-      	PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string"); 
+      	PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string");
     		return -1;
     	}
     }
@@ -162,7 +162,7 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
         	}
 	}
       else{
-      	PyErr_SetString(PyExc_TypeError, "The chromosome attribute value must be a Chromosome list"); 
+      	PyErr_SetString(PyExc_TypeError, "The chromosome attribute value must be a Chromosome list");
     		return -1;
     	}
     }
@@ -174,12 +174,12 @@ Dataset_repr(Dataset * self)
 {
 	int i;
 	PyObject *chromosomestr, * chromosome, * result, *prgy, *prgystr;
-	
+
 	prgy = PyTuple_New(self->nprgy);
 	for (i=0;i<self->nprgy;i++)
 		PyTuple_SetItem(prgy, i, PyString_FromString(self->prgy[i]));
 	prgystr = PyObject_Repr(prgy);
-	
+
 	chromosome = PyTuple_New(self->size);
 	for (i=0;i<self->size;i++){
 		Py_INCREF(self->chromosome[i]);
@@ -276,16 +276,16 @@ Dataset_setname(Dataset *self, PyObject *value, void *closure)
     PyErr_SetString(PyExc_TypeError, "Cannot delete the name attribute");
     return -1;
   }
-  
+
   if (! PyString_Check(value)) {
-    PyErr_SetString(PyExc_TypeError, 
+    PyErr_SetString(PyExc_TypeError,
                     "The name attribute value must be a string");
     return -1;
   }
-      
+
   Py_DECREF(self->name);
   Py_INCREF(value);
-  self->name = value;    
+  self->name = value;
 
   return 0;
 }
@@ -312,7 +312,7 @@ Dataset_setchromosome(Dataset *self, PyObject *chromosome, void *closure)
     PyErr_SetString(PyExc_TypeError, "Cannot delete the chromosome attribute");
     return -1;
   }
-  
+
   if (PyChromosomeList_Check(chromosome)){
     	if (self->chromosome != NULL){
     		for (i=0;i<self->size;i++){
@@ -329,7 +329,7 @@ Dataset_setchromosome(Dataset *self, PyObject *chromosome, void *closure)
       }
   }
   else {
-    PyErr_SetString(PyExc_TypeError, 
+    PyErr_SetString(PyExc_TypeError,
                     "The chromosome attribute value must be a Chromosome list");
     return -1;
   }
@@ -385,7 +385,7 @@ Dataset_clearChromosome(Dataset *self){
     	self->chromosome = NULL;
     	self->size =0;
     }
-    
+
     if (self->prgy != NULL){
 	//printf("self->nprgy = %d\n", self->nprgy);
     	for (i=0;i<self->nprgy;i++){
@@ -402,17 +402,17 @@ Dataset_clearChromosome(Dataset *self){
 }
 
 static PyMethodDef Dataset_methods[] = {
-	{"addinterval", (PyCFunction)Dataset_addinterval, 
+	{"addinterval", (PyCFunction)Dataset_addinterval,
 	METH_KEYWORDS, "Add interval map"},
-	{"add", (PyCFunction)Dataset_addparentsf1, 
+	{"add", (PyCFunction)Dataset_addparentsf1,
 	METH_KEYWORDS, "Add parents/F1 genotypes, return new object"},
-	{"read", (PyCFunction)Dataset_readFromFile, 
+	{"read", (PyCFunction)Dataset_readFromFile,
 	METH_VARARGS, "Read genotypes from a file"},
-	{"regression", (PyCFunction)Dataset_regression, 
+	{"regression", (PyCFunction)Dataset_regression,
 	METH_KEYWORDS, "regression using input values"},
-	{"permutation", (PyCFunction)Dataset_permutation, 
+	{"permutation", (PyCFunction)Dataset_permutation,
 	METH_KEYWORDS, "Permutation test"},
-	{"bootstrap", (PyCFunction)Dataset_bootstrap, 
+	{"bootstrap", (PyCFunction)Dataset_bootstrap,
 	METH_KEYWORDS, "Bootstrap test"},
 	{NULL}  /* Sentinel */
 };
@@ -431,7 +431,7 @@ Dataset_getItem(Dataset *self, int i){
 	}
     	Py_INCREF(self->chromosome[i]);
     	return self->chromosome[i];
-}	
+}
 
 
 static PySequenceMethods Dataset_as_sequence = {
@@ -475,7 +475,7 @@ PyTypeObject PyDataset_Type = {
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    Dataset_methods,             /* tp_methods */    
+    Dataset_methods,             /* tp_methods */
     Dataset_members,             /* tp_members */
     Dataset_getseters,           /* tp_getset */
     0,                         /* tp_base */
@@ -497,10 +497,10 @@ Reaper_pvalue(PyObject *self, PyObject *args){
 	double value, *temp;
 	PyObject *lst=NULL;
 	if (! PyArg_ParseTuple(args, "dO", &value, &lst))
-        return NULL; 
-	
+        return NULL;
+
 	if (!PyNumList_Check(lst)){
-      	PyErr_SetString(PyExc_TypeError, "The secoond parameter must be a numbered list"); 
+      	PyErr_SetString(PyExc_TypeError, "The secoond parameter must be a numbered list");
     		return NULL;
 	}
 	n =  PyList_GET_SIZE(lst);
@@ -528,8 +528,8 @@ Reaper_anova(PyObject *self, PyObject *args){
 	double *temp, S=0.0, SS=0.0, mean, median, sem, std, var, per25, per75;
 	PyObject *item, *Result, *lst=NULL;
 	if (! PyArg_ParseTuple(args, "O", &lst))
-        return NULL; 
-	
+        return NULL;
+
 	n =  PyList_GET_SIZE(lst);
 	temp = (double *)malloc(n*sizeof(double));
 	k = 0;
@@ -559,7 +559,7 @@ Reaper_anova(PyObject *self, PyObject *args){
 		median = (temp[k/2]+ temp[(k-2)/2])/2.0;
 	else
 		median = temp[(k-1)/2];
-	
+
 	Result = PyTuple_New(6);
 	PyTuple_SetItem(Result,0,Py_BuildValue("d",mean));
 	PyTuple_SetItem(Result,1,Py_BuildValue("d",median));
@@ -570,32 +570,32 @@ Reaper_anova(PyObject *self, PyObject *args){
 	return Result;
 }
 
-PyObject * 
+PyObject *
 Reaper_normp(PyObject *self, PyObject *args)
-{	
-	double x;	
+{
+	double x;
 	if (!PyArg_ParseTuple(args, "d", &x))
 		{printf("Error\n");return NULL;}
-	
+
 	return Py_BuildValue("d",pnorm1(x));
 }
 
 
 static PyMethodDef Reaper_module_methods[] = {
-	{"pvalue", (PyCFunction)Reaper_pvalue, 
+	{"pvalue", (PyCFunction)Reaper_pvalue,
 	METH_VARARGS, "Calculate p-value"},
-	{"anova", (PyCFunction)Reaper_anova, 
+	{"anova", (PyCFunction)Reaper_anova,
 	METH_VARARGS, "Calculate p-value"},
-	{"normp", (PyCFunction)Reaper_normp, 
+	{"normp", (PyCFunction)Reaper_normp,
 	METH_VARARGS, "Calculate normal distribution p-value"},
 	{NULL}  /* Sentinel */
-}; 
+};
 
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-initreaper(void) 
+initreaper(void)
 {
     PyObject* m;
 
@@ -610,7 +610,7 @@ initreaper(void)
 
     m = Py_InitModule3("reaper", Reaper_module_methods,
                        "QTL Reaper Module");
-                       
+
     if (m == NULL)
       return;
 
@@ -618,7 +618,7 @@ initreaper(void)
     Py_INCREF(&PyLocus_Type);
     Py_INCREF(&PyChromosome_Type);
     Py_INCREF(&PyQTL_Type);
-    
+
     PyModule_AddObject(m, "Dataset", (PyObject *)&PyDataset_Type);
     PyModule_AddObject(m, "Locus", (PyObject *)&PyLocus_Type);
     PyModule_AddObject(m, "Chromosome", (PyObject *)&PyChromosome_Type);
@@ -646,8 +646,8 @@ Dataset_addparentsf1(Dataset* self, PyObject *args, PyObject *kwds)
 					"Parents and F1 cannot be added to F2 set");
     		return NULL;
     }
-    
-    if (! PyArg_ParseTupleAndKeywords(args, kwds, "|sss", kwlist, 
+
+    if (! PyArg_ParseTupleAndKeywords(args, kwds, "|sss", kwlist,
 			&F1, &mat, &pat))
         return NULL;
     if (F1!=NULL) {
@@ -665,20 +665,20 @@ Dataset_addparentsf1(Dataset* self, PyObject *args, PyObject *kwds)
         values[n] = 1.0;
         n++;
     }
-    
+
     self2 = PyObject_GC_New(Dataset, &PyDataset_Type);
     if (self2 != NULL) {
         self2->name = PyString_FromString(PyString_AsString(self->name));
         self2->mat = PyString_FromString(PyString_AsString(self->mat));
         self2->pat = PyString_FromString(PyString_AsString(self->pat));
         self2->type = PyString_FromString(PyString_AsString(self->type));
-        if (self2->name == NULL || self2->mat == NULL 
+        if (self2->name == NULL || self2->mat == NULL
         	||self2->pat == NULL ||self2->type == NULL)
           {
             Py_DECREF(self2);
             return NULL;
           }
-        
+
         self2->nprgy = self->nprgy + n;
         self2->prgy = (char **)malloc((self2->nprgy)*sizeof(char *));
         i = 0;
@@ -701,13 +701,13 @@ Dataset_addparentsf1(Dataset* self, PyObject *args, PyObject *kwds)
  		self2->prgy[i] = (char *)malloc((strlen(self->prgy[i-n])+1)*sizeof(char));
  		strcpy(self2->prgy[i], self->prgy[i-n]);
         }
-        
+
         self2->size = self->size;
-        self2->chromosome = (PyObject **)malloc((self2->size)*sizeof(PyObject *)); 
+        self2->chromosome = (PyObject **)malloc((self2->size)*sizeof(PyObject *));
         for (i=0;i<self2->size;i++){
 		self2->chromosome[i] = Chromosome_addparentsf1((Chromosome*)(self->chromosome[i]), strains, values, n);
         }
-        
+
         if (n > 0)
         	self2->parentsf1 = 1;
         else
@@ -728,45 +728,45 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
     Dataset *self2;
     char *mat = NULL, *pat = NULL, *F1 = NULL;
     double interval = 0.0;
-    
+
     if (self->interval == 1){
     		PyErr_SetString(PyExc_SystemError,
 					"This dataset already contains intervals");
     		return NULL;
     }
-    
+
     if (! PyArg_ParseTuple(args, "|d", &interval))
         return NULL;
-    
+
     if (interval < 1.0) interval = 1.0;
-    
-    
+
+
     self2 = PyObject_GC_New(Dataset, &PyDataset_Type);
     if (self2 != NULL) {
         self2->name = PyString_FromString(PyString_AsString(self->name));
         self2->mat = PyString_FromString(PyString_AsString(self->mat));
         self2->pat = PyString_FromString(PyString_AsString(self->pat));
         self2->type = PyString_FromString(PyString_AsString(self->type));
-        if (self2->name == NULL || self2->mat == NULL 
+        if (self2->name == NULL || self2->mat == NULL
         	||self2->pat == NULL ||self2->type == NULL){
             Py_DECREF(self2);
             return NULL;
           }
-        
+
         self2->nprgy = self->nprgy;
         self2->prgy = (char **)malloc((self2->nprgy)*sizeof(char *));
-        
+
         for (i=n;i<self2->nprgy;i++){
  			self2->prgy[i] = (char *)malloc((strlen(self->prgy[i-n])+1)*sizeof(char));
  			strcpy(self2->prgy[i], self->prgy[i-n]);
         }
-        
+
         self2->size = self->size;
-        self2->chromosome = (PyObject **)malloc((self2->size)*sizeof(PyObject *)); 
+        self2->chromosome = (PyObject **)malloc((self2->size)*sizeof(PyObject *));
         for (i=0;i<self2->size;i++){
 			self2->chromosome[i] = Chromosome_addinterval((Chromosome*)(self->chromosome[i]), interval);
         }
-        
+
         self2->parentsf1 = self->parentsf1;
         self2->dominance = self->dominance;
         self2->Mb = self->Mb;
@@ -775,6 +775,7 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
     return (PyObject *)self2;
 }
 
+#define MARKERNAME_SIZE 128
 
 static PyObject *
 Dataset_readFromFile(Dataset* self, PyObject *args)
@@ -784,23 +785,23 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
     double f1, f2, f0, g;
 	double r_0,r_1,r_2,r_3,w;
     char prevgen, nextgen;
-    FILE *fp;  
+    FILE *fp;
     long lSize;
     char * buffer;
     // was tempchar[20], tempchar2[20], and we want to change to longer locus name. We guess this will be 100 characters.
-    char tempchar[100], tempchar2[100];
+    char tempchar[MARKERNAME_SIZE], tempchar2[MARKERNAME_SIZE];
     char mat[20], pat[20], het[20], unk[20];
     PyObject *file=NULL;
     char *filename;
     Chromosome* cptr = NULL;
     Locus* lptr = NULL;
     Locus* lptrpre, *lptrnext;
-    
+
     strcpy(het,"H");
     strcpy(unk,"U");
 
     if (! PyArg_ParseTuple(args,"O", &file))
-        return NULL; 
+        return NULL;
 
     if (file){
     	filename = PyString_AS_STRING(file);
@@ -814,10 +815,10 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
   	fseek (fp , 0 , SEEK_END);
   	lSize = ftell (fp);
   	rewind (fp);
-  	
+
  	Dataset_clearChromosome(self);
  	tempchar[0] = '\0';
- 	
+
  	 // allocate memory to contain the whole file.
  	buffer = (char*) malloc (lSize);
  	//ensure each line have same number of tabs
@@ -837,7 +838,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  		}
  	}
  	rewind (fp);
- 	
+
  	self->chromosome = (PyObject **)malloc(50*sizeof(PyObject *));
  	while (fgetline(fp, buffer, lSize) != EOF){
  		strstrip(buffer);
@@ -862,7 +863,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				}
  				else if (strncmp( buffer, "@pat", strlen("@pat")) == 0){
  					Py_DECREF(self->pat);
- 					self->pat = PyString_FromString(buffer +i +1); 
+ 					self->pat = PyString_FromString(buffer +i +1);
  					strcpy(pat, buffer +i +1);
  					strstrip(pat);
  				}
@@ -933,9 +934,9 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  						tempchar[i-k] = '\0';
  						cptr = (Chromosome *)(self->chromosome[self->size]);
  						Py_DECREF(cptr->name);
- 						cptr->name = PyString_FromString(tempchar); 
+ 						cptr->name = PyString_FromString(tempchar);
 						// For each chromosome, the limit of markers was 500, and now it is 10000.
- 						cptr->loci = (PyObject **)malloc(10000*sizeof(PyObject *)); 
+ 						cptr->loci = (PyObject **)malloc(10000*sizeof(PyObject *));
  						self->size += 1;
  					}
  				}
@@ -949,11 +950,11 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					lptr->genotype = (double *)malloc((lptr->size)*sizeof(double));
  					if (self->dominance == 1)
  						lptr->dominance = (double *)malloc((lptr->size)*sizeof(double));
- 					lptr->txtstr = (char *)malloc((lptr->size)*sizeof(char)); 
+ 					lptr->txtstr = (char *)malloc((lptr->size)*sizeof(char));
  					strncpy(tempchar2, buffer+k, i-k);
  					tempchar2[i-k] = '\0';
  					lptr->name = PyString_FromString(tempchar2);
- 					lptr->chr = PyString_FromString(tempchar); 
+ 					lptr->chr = PyString_FromString(tempchar);
  					cptr->size += 1;
  				}
  				else if (j == 3){
@@ -1003,7 +1004,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  			}//end of inner while
  		}//end of if
  	}//end of while
- 	
+
 	fclose (fp);
 
 	for (i=0; i< self->size; i++){
@@ -1044,8 +1045,8 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 					f1 = (lptr->cM - lptrpre->cM)/100.0;
 					f2 = (lptrnext->cM - lptr->cM)/100.0;
 					f0 = (lptrnext->cM - lptrpre->cM)/100.0;
-					
-					
+
+
 					f1 = (1.0-exp(-2*f1))/2.0;
 					f2 = (1.0-exp(-2*f2))/2.0;
 					f0 = (1.0-exp(-2*f0))/2.0;
@@ -1053,11 +1054,11 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 					r_1 = f1*(1-f2)/f0;
 					r_2 = f2*(1-f1)/f0;
 					r_3 = f1*f2/(1-f0);
-					
+
 					prevgen = lptrpre->txtstr[j];
 					nextgen = lptrnext->txtstr[j];
-					
-					
+
+
 					if ((prevgen == 'B' ) && ( nextgen == 'B'))
 						lptr->genotype[j] = 1.0 - 2*r_0;
 					else if ((prevgen == 'H' ) && ( nextgen == 'B'))
@@ -1078,9 +1079,9 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 						lptr->genotype[j] = 2*r_0 - 1.0;
 					else
 						lptr->genotype[j] = 0; //should not happen
-					
+
 					if (self->dominance == 1) {
-					
+
 						if ((prevgen == 'B' ) && (nextgen == 'B'))
 							lptr->dominance[j] = 2*r_0*r_3;
 						else if ((prevgen == 'H' ) && (nextgen == 'B'))
@@ -1104,7 +1105,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 						else
 							lptr->dominance[j] = 1; //should not happen
 					}
-					
+
 				}
 			}
 		}
@@ -1130,11 +1131,11 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 	Locus* lptr = NULL, *ctrlptr = NULL;
 	PyObject *Result, *temp;
 	static char *kwlist[] = {"strains", "trait", "variance", "control", NULL};
-	
-	if (! PyArg_ParseTupleAndKeywords(args, kwds, "OO|OO", kwlist, 
+
+	if (! PyArg_ParseTupleAndKeywords(args, kwds, "OO|OO", kwlist,
 			&strain, &value, &variance, &control))
 		return NULL;
-	
+
 	if (!PyStringList_Check(strain)){
 		PyErr_SetString(PyExc_TypeError, "Strians must be a string list");
 		return NULL;
@@ -1151,7 +1152,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 		PyErr_SetString(PyExc_TypeError, "Control must be a string");
 		return NULL;
 	}
-	
+
 	if (control != NULL){
 		located = 0;
 		for (i=0;i<self->size;i++){
@@ -1169,10 +1170,10 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			return NULL;
 		}
 	}
-	
+
 	n = PyList_GET_SIZE(strain);
 	if ( n!= PyList_GET_SIZE(value) || n < 8 || (variance != NULL && n!= PyList_GET_SIZE(variance))){
-		PyErr_SetString(PyExc_IndexError, 
+		PyErr_SetString(PyExc_IndexError,
 		"the length of the strain list and the value list are different, \nor they are less than 8 ");
 		return NULL;
 	}
@@ -1182,7 +1183,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 	VV = (double *)malloc(n*sizeof(double));
 	CC = (double *)malloc(n*sizeof(double));
 	DD = (double *)malloc(n*sizeof(double));
-	
+
 	for (i=0;i<n;i++){
 		located = 0;
 		for (j=0;j<self->nprgy;j++){
@@ -1191,7 +1192,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 				{located = 1; break;}
 		}
 		if (!located){
-			PyErr_SetString(PyExc_IndexError, 
+			PyErr_SetString(PyExc_IndexError,
 			"At least one of the strain is not in the progeny list");
 			return NULL;
 		}
@@ -1203,11 +1204,11 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 		if (variance != NULL)
 			VV[i]=PyFloat_AsDouble(PyList_GET_ITEM(variance, i));
 	}
-	
+
 	if (control != NULL)
 		for (k =0; k <n; k++)
 			CC[k] =  ctrlptr->genotype[tempindex[k]];
-			
+
 	Result = PyList_New(getnloci(self));
 	m = 0;
 	for (i=0;i<self->size;i++){
@@ -1222,7 +1223,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			}
 			if (control != NULL){
 				if (self->dominance == 1){
-					PyErr_SetString(PyExc_SystemError, 
+					PyErr_SetString(PyExc_SystemError,
 						"no composite regression for intercross");
 					return NULL;
 				}
@@ -1253,7 +1254,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
   			m++;
 		}
 	}
-	
+
 	free(tempindex);
 	free(XX);
 	free(YY);
@@ -1276,20 +1277,20 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 	Chromosome* cptr = NULL;
 	Locus* lptr = NULL;
 	PyObject *Result;
-	
+
 	int N_test = PERMUTATION_TESTSIZE;
 	int max_size = MAXPERMUTATION;
-	
+
 	double LRSThresh = -1.0;
 	int topN = 10;
 	int N_step = 1000;
 	double *LRSArray, LRSmax;
-	
+
 	static char *kwlist[] = {"strains", "trait", "variance","nperm","thresh","topN",NULL};
-	if (! PyArg_ParseTupleAndKeywords(args, kwds, "OO|Oidi", kwlist, 
+	if (! PyArg_ParseTupleAndKeywords(args, kwds, "OO|Oidi", kwlist,
 			&strain, &value, &variance, &N_test, &LRSThresh, &topN))
 		return NULL;
-	
+
 	if (!PyStringList_Check(strain)){
 		PyErr_SetString(PyExc_TypeError, "Strians must be a string list");
 		return NULL;
@@ -1302,7 +1303,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 		PyErr_SetString(PyExc_TypeError, "Variance must be a number list");
 		return NULL;
 	}
-		
+
 	if (N_test < PERMUTATION_TESTSIZE)
 		N_test = PERMUTATION_TESTSIZE;
 	if (N_test > MAXPERMUTATION)
@@ -1310,7 +1311,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 
 	n = PyList_GET_SIZE(strain);
 	if ( n!= PyList_GET_SIZE(value) || n < 8 || (variance != NULL && n!= PyList_GET_SIZE(variance))){
-		PyErr_SetString(PyExc_IndexError, 
+		PyErr_SetString(PyExc_IndexError,
 		"the length of the strain list and the value list are different, \nor they are less than 8 ");
 		return NULL;
 	}
@@ -1321,7 +1322,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 	VV = (double *)malloc(n*sizeof(double));
 	pYY = (double *)malloc(n*sizeof(double));
 	pVV = (double *)malloc(n*sizeof(double));
-	
+
 	for (i=0;i<n;i++){
 		located = 0;
 		for (j=0;j<self->nprgy;j++){
@@ -1330,7 +1331,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 				{located = 1; break;}
 		}
 		if (!located){
-			PyErr_SetString(PyExc_IndexError, 
+			PyErr_SetString(PyExc_IndexError,
 			"At least one of the strain is not in the progeny list");
 			return NULL;
 		}
@@ -1344,12 +1345,12 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 	{
 		LRSArray = (double *)malloc(N_test*sizeof(double));
 		for (m=0;m<N_test;m++){
-		
+
 			if (variance == NULL)
 				_1npermutation(YY,pYY,n);
 			else
 				_2npermutation(YY,pYY,VV,pVV,n);
-				
+
 			LRSmax = 0.0;
 			for (i=0;i<self->size;i++){
 				cptr = (Chromosome *)(self->chromosome[i]);
@@ -1359,7 +1360,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 						XX[k] =  lptr->genotype[tempindex[k]];
 					}
 					if (control != NULL){
-						PyErr_SetString(PyExc_IndexError, 
+						PyErr_SetString(PyExc_IndexError,
 							"Code for this not yet completed.");
 						return NULL;
 					}
@@ -1388,7 +1389,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 					_1npermutation(YY,pYY,n);
 				else
 					_2npermutation(YY,pYY,VV,pVV,n);
-					
+
 				LRSmax = 0.0;
 				for (i=0;i<self->size;i++){
 					cptr = (Chromosome *)(self->chromosome[i]);
@@ -1398,7 +1399,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 							XX[k] =  lptr->genotype[tempindex[k]];
 						}
 						if (control != NULL){
-							PyErr_SetString(PyExc_IndexError, 
+							PyErr_SetString(PyExc_IndexError,
 								"Code for this not yet completed.");
 							return NULL;
 						}
@@ -1422,7 +1423,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 		}
 		qsort(LRSArray,N_test, sizeof(double),compare_doubles);
 	}
-	
+
 	Result = PyList_New(N_test);
 	for (m=0;m<N_test;m++){
 		PyList_SetItem(Result,m,Py_BuildValue("d",LRSArray[m]));
@@ -1451,20 +1452,20 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 	Locus* lptr = NULL;
 	int *locusCount;
 	PyObject *Result;
-	
+
 	int N_test = PERMUTATION_TESTSIZE;
 	int max_size = MAXPERMUTATION;
-	
+
 	double LRSmax;
 	int topN = 10;
 	int N_step = 1000;
 	int LRSmaxPos;
-	
+
 	static char *kwlist[] = {"strains", "trait", "variance", "control", "nboot",NULL};
-	if (! PyArg_ParseTupleAndKeywords(args, kwds, "OO|OOi", kwlist, 
+	if (! PyArg_ParseTupleAndKeywords(args, kwds, "OO|OOi", kwlist,
 			&strain, &value, &variance, &control, &N_test))
 		return NULL;
-	
+
 	if (!PyStringList_Check(strain)){
 		PyErr_SetString(PyExc_TypeError, "Strians must be a string list");
 		return NULL;
@@ -1477,12 +1478,12 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 		PyErr_SetString(PyExc_TypeError, "Variance must be a number list");
 		return NULL;
 	}
-		
+
 	if (control != NULL && !PyNumList_Check(control)){
 		PyErr_SetString(PyExc_TypeError, "Control must be a number list");
 		return NULL;
 	}
-		
+
 	if (N_test < BOOTSTRAP_TESTSIZE)
 		N_test = BOOTSTRAP_TESTSIZE;
 	if (N_test > MAXPERMUTATION)
@@ -1491,14 +1492,14 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 	n = PyList_GET_SIZE(strain);
 	if ( n!= PyList_GET_SIZE(value) || n < 8 || (variance != NULL && n!= PyList_GET_SIZE(variance)) \
 			|| (control != NULL && n!= PyList_GET_SIZE(control))){
-		PyErr_SetString(PyExc_IndexError, 
+		PyErr_SetString(PyExc_IndexError,
 		"the length of the strain list and the value list are different, \nor they are less than 8 ");
 		return NULL;
 	}
 	srand(time(NULL));
 	nLoci = getnloci(self);
 	locusCount = (int *)malloc(nLoci*sizeof(int));
-	for (i=0;i<nLoci;i++) 	locusCount[i] = 0;	
+	for (i=0;i<nLoci;i++) 	locusCount[i] = 0;
 	tempindex = (int *)malloc(n*sizeof(int));
 	XX = (double *)malloc(n*sizeof(double));
 	YY = (double *)malloc(n*sizeof(double));
@@ -1509,7 +1510,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 	bYY = (double *)malloc(n*sizeof(double));
 	bVV = (double *)malloc(n*sizeof(double));
 	bCC = (double *)malloc(n*sizeof(double));
-	
+
 	for (i=0;i<n;i++){
 		located = 0;
 		for (j=0;j<self->nprgy;j++){
@@ -1518,7 +1519,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 				{located = 1; break;}
 		}
 		if (!located){
-			PyErr_SetString(PyExc_IndexError, 
+			PyErr_SetString(PyExc_IndexError,
 			"At least one of the strain is not in the progeny list");
 			return NULL;
 		}
@@ -1530,8 +1531,8 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 		if (control != NULL)
 			CC[i]=PyFloat_AsDouble(PyList_GET_ITEM(control, i));
 	}
-	
-	
+
+
 	for (m=0;m<N_test;m++){
 		if ((variance == NULL) && (control == NULL))
 			_1nbootStrap(YY,bYY,iXX,n);
@@ -1541,7 +1542,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 			_2nbootStrap(YY,bYY,CC,bCC,iXX,n);
 		else
 			;
-			
+
 		LRSmax = 0.0;
 		l = 0;
 		for (i=0;i<self->size;i++){
@@ -1552,7 +1553,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 					XX[k] =  lptr->genotype[tempindex[k]];
 				for (k =0; k <n; k++)
 					bXX[k] =  XX[iXX[k]];
-					
+
 				if (control != NULL){
 					_3nRegression(bYY, bXX, bCC, n, result, 1);
 				}
@@ -1572,7 +1573,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 		locusCount[LRSmaxPos]++;
 	}
 
-	
+
 	Result = PyTuple_New(nLoci);
 	for (m=0;m<nLoci;m++){
 		PyTuple_SetItem(Result,m,Py_BuildValue("i",locusCount[m]));
@@ -1590,5 +1591,3 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 	free(locusCount);
 	return Result;
 }
-
-
