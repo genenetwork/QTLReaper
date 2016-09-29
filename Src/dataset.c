@@ -22,6 +22,11 @@
 #include "geneobject.h"
 #include "regression.h"
 
+#define MAX_MARKERNAME_SIZE   256
+#define MAX_GENONAME_SIZE     256
+#define MAX_CHROMOSOMES       100
+#define MAX_MARKERS        100000
+
 char GENOSYMBOL[] = "BDHU";
 
 //Member function star here
@@ -140,7 +145,7 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
         self->name = name;
       }
       else{
-      	PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string");
+      	PyErr_SetString(PyExc_TypeError, "reaper: The name attribute value must be a string");
     		return -1;
    	}
     }
@@ -162,7 +167,7 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
         	}
 	}
       else{
-      	PyErr_SetString(PyExc_TypeError, "The chromosome attribute value must be a Chromosome list");
+      	PyErr_SetString(PyExc_TypeError, "reaper: The chromosome attribute value must be a Chromosome list");
     		return -1;
     	}
     }
@@ -206,7 +211,7 @@ static PyMemberDef Dataset_members[] = {
 static int
 Dataset_nosetattr(Dataset *self, PyObject *value, void *closure)
 {
-  PyErr_SetString(PyExc_TypeError, "this attribute value cannot be reset");
+  PyErr_SetString(PyExc_TypeError, "reaper: this attribute value cannot be reset");
   return -1;
 }
 
@@ -273,13 +278,13 @@ static int
 Dataset_setname(Dataset *self, PyObject *value, void *closure)
 {
   if (value == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Cannot delete the name attribute");
+    PyErr_SetString(PyExc_TypeError, "reaper: Cannot delete the name attribute");
     return -1;
   }
 
   if (! PyString_Check(value)) {
     PyErr_SetString(PyExc_TypeError,
-                    "The name attribute value must be a string");
+                    "reaper: The name attribute value must be a string");
     return -1;
   }
 
@@ -309,7 +314,7 @@ Dataset_setchromosome(Dataset *self, PyObject *chromosome, void *closure)
   int i;
   PyObject * temp;
   if (chromosome == NULL) {
-    PyErr_SetString(PyExc_TypeError, "Cannot delete the chromosome attribute");
+    PyErr_SetString(PyExc_TypeError, "reaper: Cannot delete the chromosome attribute");
     return -1;
   }
 
@@ -500,7 +505,7 @@ Reaper_pvalue(PyObject *self, PyObject *args){
         return NULL;
 
 	if (!PyNumList_Check(lst)){
-      	PyErr_SetString(PyExc_TypeError, "The secoond parameter must be a numbered list");
+      	PyErr_SetString(PyExc_TypeError, "reaper: The secoond parameter must be a numbered list");
     		return NULL;
 	}
 	n =  PyList_GET_SIZE(lst);
@@ -542,7 +547,7 @@ Reaper_anova(PyObject *self, PyObject *args){
 	}
 	if (k<4){
     		PyErr_SetString(PyExc_SystemError,
-			"there should be at least four numbers");
+			"reaper: there should be at least four numbers");
     		return NULL;
     	}
 	qsort(temp, k, sizeof(double),compare_doubles);
@@ -638,12 +643,12 @@ Dataset_addparentsf1(Dataset* self, PyObject *args, PyObject *kwds)
     static char *kwlist[] = {"F1", "Mat", "Pat", NULL};
     if (self->parentsf1 == 1){
     		PyErr_SetString(PyExc_SystemError,
-					"Parents and F1 have already been added");
+					"reaper: Parents and F1 have already been added");
     		return NULL;
     }
     if (self->dominance == 1){
     		PyErr_SetString(PyExc_SystemError,
-					"Parents and F1 cannot be added to F2 set");
+					"reaper: Parents and F1 cannot be added to F2 set");
     		return NULL;
     }
 
@@ -731,7 +736,7 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
 
     if (self->interval == 1){
     		PyErr_SetString(PyExc_SystemError,
-					"This dataset already contains intervals");
+					"reaper: This dataset already contains intervals");
     		return NULL;
     }
 
@@ -775,11 +780,6 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
     return (PyObject *)self2;
 }
 
-#define MAX_MARKERNAME_SIZE   128
-#define MAX_GENONAME_SIZE     128
-#define MAX_CHROMOSOMES        50
-#define MAX_MARKERS         50000
-
 static PyObject *
 Dataset_readFromFile(Dataset* self, PyObject *args)
 {
@@ -808,11 +808,11 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 
     if (file){
     	filename = PyString_AS_STRING(file);
-    	printf("Reading %s\n", filename);
+    	printf("reaper: parsing %s\n", filename);
     	fp = fopen(filename,"rb");
     	if (fp == NULL){
     		PyErr_SetString(PyExc_SystemError,
-					"The given file doesn't exist");
+					"reaper: The given file doesn't exist");
     		return NULL;}
     	// obtain file size.
   	fseek (fp , 0 , SEEK_END);
@@ -836,7 +836,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				tCount = charcount(buffer, '\t');
  			else if (tCount != charcount(buffer, '\t')){
     				PyErr_SetString(PyExc_SystemError,
-					"Each line should have the same number of Tabs");
+					"reaper: Each line should have the same number of Tabs");
 				return NULL;
 			}
  		}
@@ -863,9 +863,9 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					Py_DECREF(self->mat);
 
  					self->mat = PyString_FromString(buffer +i +1);
-                                        if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
+                                        if (strlen(buffer +i +1)>MAX_GENONAME_SIZE-1) {
                                           PyErr_SetString(PyExc_SystemError,
-                                                          "Memory error for mat MAX_GENONAME_SIZE");
+                                                          "reaper: Memory error for mat MAX_GENONAME_SIZE");
                                           return NULL;
                                         }
 
@@ -875,27 +875,27 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				else if (strncmp( buffer, "@pat", strlen("@pat")) == 0){
  					Py_DECREF(self->pat);
  					self->pat = PyString_FromString(buffer +i +1);
-                                        if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
+                                        if (strlen(buffer +i +1)>MAX_GENONAME_SIZE-1) {
                                           PyErr_SetString(PyExc_SystemError,
-                                                          "Memory error for pat MAX_GENONAME_SIZE");
+                                                          "reaper: Memory error for pat MAX_GENONAME_SIZE");
                                           return NULL;
                                         }
  					strcpy(pat, buffer +i +1);
  					strstrip(pat);
  				}
  				else if (strncmp( buffer, "@het", strlen("@het")) == 0){
-                                  if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
+                                  if (strlen(buffer +i +1)>MAX_GENONAME_SIZE-1) {
                                     PyErr_SetString(PyExc_SystemError,
-                                                    "Memory error for het MAX_GENONAME_SIZE");
+                                                    "reaper: Memory error for het MAX_GENONAME_SIZE");
                                     return NULL;
                                   }
  					strcpy(het, buffer +i +1);
  					strstrip(het);
  				}
  				else if (strncmp( buffer, "@unk", strlen("@unk")) == 0){
-                                  if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
+                                  if (strlen(buffer +i +1)>MAX_GENONAME_SIZE-1) {
                                     PyErr_SetString(PyExc_SystemError,
-                                                    "Memory error for unk MAX_GENONAME_SIZE");
+                                                    "reaper: Memory error for unk MAX_GENONAME_SIZE");
                                     return NULL;
                                   }
  					strcpy(unk, buffer +i +1);
@@ -940,7 +940,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  		else if (strlen(buffer) > 0){
  			if (header == 0){
     				PyErr_SetString(PyExc_SystemError,
-					"Header row is not located");
+					"reaper: Header row is not located");
 				return NULL;
 			}
  			i = k = 0;
@@ -953,7 +953,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
                                         break;
                                 if (i-k>MAX_MARKERNAME_SIZE-1) {
                                   PyErr_SetString(PyExc_SystemError,
-                                                  "Memory error for MAX_MARKERNAME_SIZE");
+                                                  "reaper: Memory error for MAX_MARKERNAME_SIZE");
                                   return NULL;
                                 }
 
@@ -989,7 +989,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					lptr->chr = PyString_FromString(tempchar);
                                         if (cptr->size >= MAX_MARKERS-1) {
                                           PyErr_SetString(PyExc_SystemError,
-                                                          "Memory error for MAX_MARKERS");
+                                                          "reaper: memory error for MAX_MARKERS");
                                           return NULL;
                                         }
  					cptr->size += 1;
@@ -1148,9 +1148,10 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 		}
 	}
 
-    Py_INCREF(Py_None);
-    free(buffer);
-    return Py_None;
+        printf("reaper: done parsing\n");
+        Py_INCREF(Py_None);
+        free(buffer);
+        return Py_None;
     }
     else
     	return NULL;
@@ -1174,19 +1175,19 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 		return NULL;
 
 	if (!PyStringList_Check(strain)){
-		PyErr_SetString(PyExc_TypeError, "Strians must be a string list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Strains must be a string list");
 		return NULL;
 	}
 	if (!PyNumList_Check(value)){
-		PyErr_SetString(PyExc_TypeError, "Trait value must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Trait value must be a number list");
 		return NULL;
 	}
 	if (variance != NULL && !PyNumList_Check(variance)){
-		PyErr_SetString(PyExc_TypeError, "Variance must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Variance must be a number list");
 		return NULL;
 	}
 	if (control != NULL && !PyString_Check(control)){
-		PyErr_SetString(PyExc_TypeError, "Control must be a string");
+		PyErr_SetString(PyExc_TypeError, "reaper: Control must be a string");
 		return NULL;
 	}
 
@@ -1203,7 +1204,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			if (located) break;
 		}
 		if (!located){
-			PyErr_SetString(PyExc_IndexError, "The control cannot be found in the loci list");
+			PyErr_SetString(PyExc_IndexError, "reaper: The control cannot be found in the loci list");
 			return NULL;
 		}
 	}
@@ -1211,7 +1212,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 	n = PyList_GET_SIZE(strain);
 	if ( n!= PyList_GET_SIZE(value) || n < 8 || (variance != NULL && n!= PyList_GET_SIZE(variance))){
 		PyErr_SetString(PyExc_IndexError,
-		"the length of the strain list and the value list are different, \nor they are less than 8 ");
+		"reaper: the length of the strain list and the value list are different, \nor they are less than 8 ");
 		return NULL;
 	}
 	tempindex = (int *)malloc(n*sizeof(int));
@@ -1230,7 +1231,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 		}
 		if (!located){
 			PyErr_SetString(PyExc_IndexError,
-			"At least one of the strain is not in the progeny list");
+			"reaper: At least one of the strain is not in the progeny list");
 			return NULL;
 		}
 		else{
@@ -1261,7 +1262,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			if (control != NULL){
 				if (self->dominance == 1){
 					PyErr_SetString(PyExc_SystemError,
-						"no composite regression for intercross");
+						"reaper: no composite regression for intercross");
 					return NULL;
 				}
 				if (variance == NULL)
@@ -1329,15 +1330,15 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 		return NULL;
 
 	if (!PyStringList_Check(strain)){
-		PyErr_SetString(PyExc_TypeError, "Strians must be a string list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Strains must be a string list");
 		return NULL;
 	}
 	if (!PyNumList_Check(value)){
-		PyErr_SetString(PyExc_TypeError, "Trait value must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Trait value must be a number list");
 		return NULL;
 	}
 	if (variance != NULL && !PyNumList_Check(variance)){
-		PyErr_SetString(PyExc_TypeError, "Variance must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Variance must be a number list");
 		return NULL;
 	}
 
@@ -1349,7 +1350,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 	n = PyList_GET_SIZE(strain);
 	if ( n!= PyList_GET_SIZE(value) || n < 8 || (variance != NULL && n!= PyList_GET_SIZE(variance))){
 		PyErr_SetString(PyExc_IndexError,
-		"the length of the strain list and the value list are different, \nor they are less than 8 ");
+		"reaper: the length of the strain list and the value list are different, \nor they are less than 8 ");
 		return NULL;
 	}
 	srand(time(NULL));
@@ -1504,20 +1505,20 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 		return NULL;
 
 	if (!PyStringList_Check(strain)){
-		PyErr_SetString(PyExc_TypeError, "Strians must be a string list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Strains must be a string list");
 		return NULL;
 	}
 	if (!PyNumList_Check(value)){
-		PyErr_SetString(PyExc_TypeError, "Trait value must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Trait value must be a number list");
 		return NULL;
 	}
 	if (variance != NULL && !PyNumList_Check(variance)){
-		PyErr_SetString(PyExc_TypeError, "Variance must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Variance must be a number list");
 		return NULL;
 	}
 
 	if (control != NULL && !PyNumList_Check(control)){
-		PyErr_SetString(PyExc_TypeError, "Control must be a number list");
+		PyErr_SetString(PyExc_TypeError, "reaper: Control must be a number list");
 		return NULL;
 	}
 
@@ -1530,7 +1531,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 	if ( n!= PyList_GET_SIZE(value) || n < 8 || (variance != NULL && n!= PyList_GET_SIZE(variance)) \
 			|| (control != NULL && n!= PyList_GET_SIZE(control))){
 		PyErr_SetString(PyExc_IndexError,
-		"the length of the strain list and the value list are different, \nor they are less than 8 ");
+		"reaper: the length of the strain list and the value list are different, \nor they are less than 8 ");
 		return NULL;
 	}
 	srand(time(NULL));
@@ -1557,7 +1558,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 		}
 		if (!located){
 			PyErr_SetString(PyExc_IndexError,
-			"At least one of the strain is not in the progeny list");
+			"reaper: At least one of the strain is not in the progeny list");
 			return NULL;
 		}
 		else
