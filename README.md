@@ -12,6 +12,31 @@ To install qtlreaper module, execute:
 
 	python setup.py install
 
+For a local test
+
+    env PYTHONPATH=./build:$PYTHONPATH python
+
+and
+
+```python
+import reaper
+geno = reaper.Dataset()
+geno.read("/home/user/gn2_data/genotype/BXD.geno")
+print geno.type
+  riset
+print list(genotype.prgy)
+  ['BXD1', 'BXD2', 'BXD5', 'BXD6', 'BXD8', 'BXD9', 'BXD11', 'BXD12', 'BXD13', 'BXD14', 'BXD15' ...]
+```
+
+For a local installation
+
+    python setup.py install --prefix=$HOME/tmp
+
+and prepend that to the PYTHONPATH
+
+    env PYTHONPATH=/home/wrk/tmp/lib/python2.7/site-packages:$PYTHONPATH python
+
+
 ## License
 
 The QTLReaper source code is released under the GNU General Public License version 2.0 (GPLv2). See [here](http://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html).
