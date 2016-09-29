@@ -775,9 +775,10 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
     return (PyObject *)self2;
 }
 
-#define MAX_MARKERNAME_SIZE 128
-#define MAX_GENONAME_SIZE   128
-#define MAX_CHROMOSOMES      50
+#define MAX_MARKERNAME_SIZE   128
+#define MAX_GENONAME_SIZE     128
+#define MAX_CHROMOSOMES        50
+#define MAX_MARKERS         50000
 
 static PyObject *
 Dataset_readFromFile(Dataset* self, PyObject *args)
@@ -954,8 +955,8 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  						cptr = (Chromosome *)(self->chromosome[self->size]);
  						Py_DECREF(cptr->name);
  						cptr->name = PyString_FromString(tempchar);
-						// For each chromosome, the limit of markers was 500, and now it is 10000.
- 						cptr->loci = (PyObject **)malloc(10000*sizeof(PyObject *));
+						// For each chromosome, the limit of markers was 500, and now it is MAX_MARKERS.
+ 						cptr->loci = (PyObject **)malloc(MAX_MARKERS*sizeof(PyObject *));
  						self->size += 1;
  					}
  				}
@@ -974,6 +975,9 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					tempchar2[i-k] = '\0';
  					lptr->name = PyString_FromString(tempchar2);
  					lptr->chr = PyString_FromString(tempchar);
+                                        if (cptr->size >= MAX_MARKERS-1)
+                                          PyErr_SetString(PyExc_SystemError,
+                                                          "Memory error for MAX_MARKERS");
  					cptr->size += 1;
  				}
  				else if (j == 3){
