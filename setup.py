@@ -19,12 +19,12 @@ sourcelist = [os.path.join('Src', 'locus.c'),
 
 
 #uncomment the following lines to use lapack_lite
-lapacklist = [os.path.join('Src', 'blas_lite.c'), 
+lapacklist = [os.path.join('Src', 'blas_lite.c'),
                os.path.join('Src', 'f2c_lite.c'),
                os.path.join('Src', 'dlapack_lite.c')
              ]
 libraries_list = []
- 
+
 #uncomment the following lines to use your own BLAS
 #lapacklist = []
 #libraries_list = ['lapack','blas','g2c']
@@ -36,10 +36,10 @@ include_dirs = ['Include']
 ext_modules = [
     Extension('reaper',sourcelist,
       	  libraries = libraries_list,
-              extra_compile_args = extra_compile_args) 
+              extra_compile_args = extra_compile_args)
     ]
-    
-setup(name="Reaper", version="1.0",
+
+setup(name="Reaper", version="1.1-gn2",
       extra_path = 'qtlreaper',
       packages = packages,
       headers = headers,
