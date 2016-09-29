@@ -775,7 +775,9 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
     return (PyObject *)self2;
 }
 
-#define MARKERNAME_SIZE 128
+#define MAX_MARKERNAME_SIZE 128
+#define MAX_GENONAME_SIZE   128
+#define MAX_CHROMOSOMES      50
 
 static PyObject *
 Dataset_readFromFile(Dataset* self, PyObject *args)
@@ -789,8 +791,8 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
     long lSize;
     char * buffer;
     // was tempchar[20], tempchar2[20], and we want to change to longer locus name. We guess this will be 100 characters.
-    char tempchar[MARKERNAME_SIZE], tempchar2[MARKERNAME_SIZE];
-    char mat[20], pat[20], het[20], unk[20];
+    char tempchar[MAX_MARKERNAME_SIZE], tempchar2[MAX_MARKERNAME_SIZE];
+    char mat[MAX_GENONAME_SIZE], pat[MAX_GENONAME_SIZE], het[MAX_GENONAME_SIZE], unk[MAX_GENONAME_SIZE];
     PyObject *file=NULL;
     char *filename;
     Chromosome* cptr = NULL;
@@ -839,7 +841,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  	}
  	rewind (fp);
 
- 	self->chromosome = (PyObject **)malloc(50*sizeof(PyObject *));
+ 	self->chromosome = (PyObject **)malloc(MAX_CHROMOSOMES*sizeof(PyObject *));
  	while (fgetline(fp, buffer, lSize) != EOF){
  		strstrip(buffer);
  		if (buffer[0] == '#' || buffer[0] == '\0')
@@ -857,21 +859,34 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				}
  				else if (strncmp( buffer, "@mat", strlen("@mat")) == 0){
  					Py_DECREF(self->mat);
+
  					self->mat = PyString_FromString(buffer +i +1);
+                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
+                                          PyErr_SetString(PyExc_SystemError,
+                                                          "Memory error for mat MAX_GENONAME_SIZE");
  					strcpy(mat, buffer +i +1);
  					strstrip(mat);
  				}
  				else if (strncmp( buffer, "@pat", strlen("@pat")) == 0){
  					Py_DECREF(self->pat);
  					self->pat = PyString_FromString(buffer +i +1);
+                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
+                                          PyErr_SetString(PyExc_SystemError,
+                                                          "Memory error for pat MAX_GENONAME_SIZE");
  					strcpy(pat, buffer +i +1);
  					strstrip(pat);
  				}
  				else if (strncmp( buffer, "@het", strlen("@het")) == 0){
+                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
+                                          PyErr_SetString(PyExc_SystemError,
+                                                          "Memory error for het MAX_GENONAME_SIZE");
  					strcpy(het, buffer +i +1);
  					strstrip(het);
  				}
  				else if (strncmp( buffer, "@unk", strlen("@unk")) == 0){
+                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
+                                          PyErr_SetString(PyExc_SystemError,
+                                                          "Memory error for unk MAX_GENONAME_SIZE");
  					strcpy(unk, buffer +i +1);
  					strstrip(unk);
  				}
@@ -924,9 +939,11 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				while (buffer[i] != '\0' && buffer[i] != '\t')
  					i++;
  				if (buffer[i] == '\0' && i == k)
-                                       break;
-                                if (i-k>MARKERNAME_SIZE-1)
-                                        error(2,EINVAL,"Memory error for marker name <%s>",buffer+k);
+                                        break;
+                                if (i-k>MAX_MARKERNAME_SIZE-1)
+                                  PyErr_SetString(PyExc_SystemError,
+                                                  "Memory error for MAX_MARKERNAME_SIZE");
+
  				j += 1;
  				if (j == 1){
  					if (strncmp(buffer+k, tempchar, i-k) != 0){
