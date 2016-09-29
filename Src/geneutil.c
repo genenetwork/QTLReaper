@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with QTL Reaper; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 
@@ -186,7 +186,7 @@ PyQTL_New(PyObject *locus, double lrs, double additive)
 	if (op == NULL) {
 		return NULL;
 	}
-	
+
 	if (locus != NULL){
 		Py_INCREF(locus);
 		op->locus = locus;
@@ -206,7 +206,7 @@ PyQTL_NewDominance(PyObject *locus, double lrs, double additive, double dominanc
 	if (op == NULL) {
 		return NULL;
 	}
-	
+
 	if (locus != NULL){
 		Py_INCREF(locus);
 		op->locus = locus;
@@ -247,7 +247,7 @@ Locus_addparentsf1(Locus* locus, char *strainName, double *value, int n){
 		op->txtstr[i] = locus->txtstr[i-n];
 		if (locus->dominance != NULL) op->dominance[i] = locus->dominance[i-n];
 	}
-	
+
 	op->name = PyString_FromString(PyString_AsString(locus->name));
 	op->chr = PyString_FromString(PyString_AsString(locus->chr));
 	PyObject_GC_Track(op);
@@ -263,7 +263,7 @@ Chromosome_addparentsf1(Chromosome* chr, char *strainName, double *value, int n)
 		return NULL;
 	}
 	op->size = chr->size;
-	op->loci = (PyObject **)malloc((op->size)*sizeof(PyObject *)); 
+	op->loci = (PyObject **)malloc((op->size)*sizeof(PyObject *));
 	for (i=0;i<op->size;i++){
 		op->loci[i] = Locus_addparentsf1((Locus *)(chr->loci[i]), strainName, value, n);
 	}
@@ -272,6 +272,7 @@ Chromosome_addparentsf1(Chromosome* chr, char *strainName, double *value, int n)
 	return (PyObject *) op;
 }
 
+#define MAX_LOCI  10000
 
 PyObject *
 Chromosome_addinterval(Chromosome* chr, double interval){
@@ -281,19 +282,20 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 	Locus *realPreLocus, *realNextLocus;
 	char * chrName, prevgen, nextgen;
 	double curCM, curMb, MbStep;
-	
+
 	double m1,m2,f1,f2,m0,f0;
 	double r_0,r_1,r_2,r_3,w,g;
-	
+
 	if (interval < 1.0) interval = 1.0;
 	op = PyObject_GC_New(Chromosome, &PyChromosome_Type);
 	if (op == NULL) {
 		return NULL;
 	}
 	op->size = 0;
-	op->loci = (PyObject **)malloc(1000*sizeof(PyObject *));
+	op->loci = (PyObject **)malloc(MAX_LOCI*sizeof(PyObject *));
 	//printf("\n\nChr %s\n", PyString_AsString(chr->name));
 	for (i = 0; i < chr->size; i++){
+
 		curLocus = (Locus *)(chr->loci[i]);
 		chrName = PyString_AsString(curLocus->chr);
 		curCM = curLocus->cM;
@@ -306,46 +308,46 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 			nextLocus = (Locus *)(chr->loci[i+1]);
 			MbStep = (nextLocus->Mb - curLocus->Mb)*interval/(nextLocus->cM - curLocus->cM);
 		}
-		
-		k =  0;	
-		do {	
+
+		k =  0;
+		do {
 			lcus = PyObject_GC_New(Locus, &PyLocus_Type);
 			if (lcus == NULL) {
 				return NULL;
 			}
-			
+
 			lcus->size = curLocus->size;
 			lcus->cM = curCM;
 			lcus->Mb = curMb;
-			
+
 			lcus->genotype = (double *)malloc((lcus->size)*sizeof(double));
 			lcus->txtstr = (char *)malloc((lcus->size)*sizeof(char));
 			lcus->dominance = NULL;
 			if (curLocus->dominance != NULL)
 				lcus->dominance = (double *)malloc((lcus->size)*sizeof(double));
-			
-			
+
+
 			if (k>0){
 				lcus->name = PyString_FromString(" - ");
-				
+
 				for (j=0;j<lcus->size;j++){
-								
+
 					m = i;
 					while ((m>=0) && (((Locus *)(chr->loci[m]))->txtstr[j] == 'U')) m--;
 					n = i+1;
-					while ((n<=chr->size) && (((Locus *)(chr->loci[n]))->txtstr[j] == 'U')) n++;	
-					
+					while ((n<=chr->size) && (((Locus *)(chr->loci[n]))->txtstr[j] == 'U')) n++;
+
 					realPreLocus = (Locus *)(chr->loci[m]);
 					realNextLocus = (Locus *)(chr->loci[n]);
-		
+
 					prevgen = realPreLocus->txtstr[j];
 					nextgen = realNextLocus->txtstr[j];
-					
-					
+
+
 					m1 = (curCM - realPreLocus->cM)/100.0;
 					m2 = (realNextLocus->cM - curCM)/100.0;
 					m0 = (realNextLocus->cM - realPreLocus->cM)/100.0;
-					
+
 					f1 = (1.0-exp(-2*m1))/2.0;
 					f2 = (1.0-exp(-2*m2))/2.0;
 					f0 = (1.0-exp(-2*m0))/2.0;
@@ -353,8 +355,8 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 					r_1 = f1*(1-f2)/f0;
 					r_2 = f2*(1-f1)/f0;
 					r_3 = f1*f2/(1-f0);
-					
-					
+
+
 					if ((prevgen == 'B' ) && ( nextgen == 'B'))
 						g = 1.0 - 2*r_0;
 					else if ((prevgen == 'H' ) && ( nextgen == 'B'))
@@ -377,9 +379,9 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 						g = curLocus->genotype[j]; //should not happen
 					lcus->genotype[j] = g;
 					lcus->txtstr[j] = curLocus->txtstr[j];
-					
+
 					if (lcus->dominance != NULL){
-					
+
 						if ((prevgen == 'B' ) && (nextgen == 'B'))
 							g = 2*r_0*r_3;
 						else if ((prevgen == 'H' ) && (nextgen == 'B'))
@@ -423,9 +425,9 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 			curMb += MbStep;
 			//printf("%d -- %2.3f  --  %2.3f  --  %2.3f\n", k, curCM - interval, curLocus->cM, nextLocus->cM);
 		}
-		while(curCM < nextLocus->cM); 
+		while(curCM < nextLocus->cM);
 	}
-	
+
 	op->name = PyString_FromString(PyString_AsString(chr->name));
 	PyObject_GC_Track(op);
 	return (PyObject *) op;
@@ -433,5 +435,3 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 
 
 /*end method function*/
-
-
