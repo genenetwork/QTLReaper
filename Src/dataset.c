@@ -142,7 +142,7 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
       else{
       	PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string");
     		return -1;
-    	}
+   	}
     }
 
     if (chromosome) {
@@ -808,7 +808,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
 
     if (file){
     	filename = PyString_AS_STRING(file);
-    	//printf("file name = %s\n", filename);
+    	printf("Reading %s\n", filename);
     	fp = fopen(filename,"rb");
     	if (fp == NULL){
     		PyErr_SetString(PyExc_SystemError,
@@ -828,6 +828,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  	tCount = 0;
  	while (fgetline(fp, buffer, lSize) != EOF){
  		strstrip(buffer);
+                // fprintf(stderr,buffer);
  		if (buffer[0] == '#' || buffer[0] == '\0' || buffer[0] =='@'){
  		}
  		else{
@@ -862,32 +863,41 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					Py_DECREF(self->mat);
 
  					self->mat = PyString_FromString(buffer +i +1);
-                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
+                                        if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
                                           PyErr_SetString(PyExc_SystemError,
                                                           "Memory error for mat MAX_GENONAME_SIZE");
+                                          return NULL;
+                                        }
+
  					strcpy(mat, buffer +i +1);
  					strstrip(mat);
  				}
  				else if (strncmp( buffer, "@pat", strlen("@pat")) == 0){
  					Py_DECREF(self->pat);
  					self->pat = PyString_FromString(buffer +i +1);
-                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
+                                        if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
                                           PyErr_SetString(PyExc_SystemError,
                                                           "Memory error for pat MAX_GENONAME_SIZE");
+                                          return NULL;
+                                        }
  					strcpy(pat, buffer +i +1);
  					strstrip(pat);
  				}
  				else if (strncmp( buffer, "@het", strlen("@het")) == 0){
-                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
-                                          PyErr_SetString(PyExc_SystemError,
-                                                          "Memory error for het MAX_GENONAME_SIZE");
+                                  if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
+                                    PyErr_SetString(PyExc_SystemError,
+                                                    "Memory error for het MAX_GENONAME_SIZE");
+                                    return NULL;
+                                  }
  					strcpy(het, buffer +i +1);
  					strstrip(het);
  				}
  				else if (strncmp( buffer, "@unk", strlen("@unk")) == 0){
-                                        if (PyString_Size(buffer +1 +1)>MAX_GENONAME_SIZE)
-                                          PyErr_SetString(PyExc_SystemError,
-                                                          "Memory error for unk MAX_GENONAME_SIZE");
+                                  if (PyString_Size(buffer +i +1)>MAX_GENONAME_SIZE) {
+                                    PyErr_SetString(PyExc_SystemError,
+                                                    "Memory error for unk MAX_GENONAME_SIZE");
+                                    return NULL;
+                                  }
  					strcpy(unk, buffer +i +1);
  					strstrip(unk);
  				}
@@ -941,9 +951,11 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					i++;
  				if (buffer[i] == '\0' && i == k)
                                         break;
-                                if (i-k>MAX_MARKERNAME_SIZE-1)
+                                if (i-k>MAX_MARKERNAME_SIZE-1) {
                                   PyErr_SetString(PyExc_SystemError,
                                                   "Memory error for MAX_MARKERNAME_SIZE");
+                                  return NULL;
+                                }
 
  				j += 1;
  				if (j == 1){
@@ -975,9 +987,11 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					tempchar2[i-k] = '\0';
  					lptr->name = PyString_FromString(tempchar2);
  					lptr->chr = PyString_FromString(tempchar);
-                                        if (cptr->size >= MAX_MARKERS-1)
+                                        if (cptr->size >= MAX_MARKERS-1) {
                                           PyErr_SetString(PyExc_SystemError,
                                                           "Memory error for MAX_MARKERS");
+                                          return NULL;
+                                        }
  					cptr->size += 1;
  				}
  				else if (j == 3){

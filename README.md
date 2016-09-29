@@ -14,18 +14,18 @@ To install qtlreaper module, execute:
 
 For a local test
 
-    env PYTHONPATH=./build:$PYTHONPATH python
+    python setup.py build ; env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python test/runtest.py
 
-and
+which does
 
 ```python
 import reaper
 geno = reaper.Dataset()
-geno.read("/home/user/gn2_data/genotype/BXD.geno")
+geno.read("test/data/input/AXB.geno")
 print geno.type
   riset
-print list(genotype.prgy)
-  ['BXD1', 'BXD2', 'BXD5', 'BXD6', 'BXD8', 'BXD9', 'BXD11', 'BXD12', 'BXD13', 'BXD14', 'BXD15' ...]
+print list(geno.prgy)
+  ['AXB1', 'AXB2', 'AXB3', 'AXB4', 'AXB5', 'AXB6', 'AXB7', 'AXB8', 'AXB9', 'AXB10', 'AXB11', 'AXB12', 'AXB13', 'AXB14', 'AXB15', 'AXB17', 'AXB19', 'AXB21', 'AXB23', 'AXB2']
 ```
 
 For a local installation
