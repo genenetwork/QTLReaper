@@ -14,8 +14,7 @@ To install qtlreaper module, execute:
 
 For a local test
 
-    python setup.py build
-    env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python test/runtest.py
+    python setup.py test
 
 which does
 
@@ -29,9 +28,9 @@ print list(geno.prgy)
   ['AXB1', 'AXB2', 'AXB3', 'AXB4', 'AXB5', 'AXB6', 'AXB7', 'AXB8', 'AXB9', 'AXB10', 'AXB11', 'AXB12', 'AXB13', 'AXB14', 'AXB15', 'AXB17', 'AXB19', 'AXB21', 'AXB23', 'AXB2']
 ```
 
-Other examples are
+Examples are
 
-    env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python test/example1.py
+    env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python ./test/example1.py
     env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python ./test/example2.py test/data/input/BXD.txt test/data/input/trait.txt output.txt highest.txt
 
 For a local installation

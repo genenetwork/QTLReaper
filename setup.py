@@ -5,7 +5,8 @@ if not hasattr(sys, 'version_info') or sys.version_info < (2,2,0,'alpha',0):
     raise SystemExit, "Python 2.2 or later required to build Numeric."
 
 import distutils
-from distutils.core import setup, Extension
+import subprocess
+from distutils.core import setup, Extension, Command
 
 headers = glob (os.path.join ("Include","*.h"))
 extra_compile_args = []
@@ -39,11 +40,36 @@ ext_modules = [
               extra_compile_args = extra_compile_args)
     ]
 
+class TestCommand(Command):
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def execx(self,cmd):
+        print "Running shell command:",cmd
+        err = subprocess.call(cmd, shell=True)
+        print err
+        if err != 0:
+            raise SystemExit("Test error:" + cmd)
+
+    def run(self):
+        # self.execx("exit 1")
+        self.execx("env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python test/runtest.py")
+        self.execx("env PYTHONPATH=./build/lib.linux-x86_64-2.7/ python test/example1.py")
+
+
 setup(name="Reaper", version="1.1-gn2",
       extra_path = 'qtlreaper',
       packages = packages,
       headers = headers,
       include_dirs = include_dirs,
-      ext_modules = ext_modules
-      )
-
+      ext_modules = ext_modules,
+      cmdclass = {
+          "test": TestCommand
+      }
+)
