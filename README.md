@@ -44,7 +44,7 @@ and prepend that to the PYTHONPATH
 
 ## License
 
-The QTLReaper source code is released under the GNU General Public License version 2.0 (GPLv2). See [here](http://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html).
+The QTLReaper source code is released under the GNU General Public License version 2.0 (GPLv2). See [here](https://www.gnu.org/licenses/gpl-2.0.html).
 
 ## Author
 
