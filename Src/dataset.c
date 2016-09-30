@@ -604,6 +604,7 @@ initreaper(void)
 {
     PyObject* m;
 
+    // valgrind: suggests a memory leak in the following lines (see also http://bugs.python.org/issue10156):
     if (PyType_Ready(&PyDataset_Type) < 0)
         return;
     if (PyType_Ready(&PyChromosome_Type) < 0)
@@ -979,6 +980,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					lptr = (Locus *)(cptr->loci[cptr->size]);
  					Py_DECREF(lptr->name);
  					lptr->size = n-genStartPos+1;
+                                        // valgrind: suggests leaks
  					lptr->genotype = (double *)malloc((lptr->size)*sizeof(double));
  					if (self->dominance == 1)
  						lptr->dominance = (double *)malloc((lptr->size)*sizeof(double));
