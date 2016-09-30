@@ -988,8 +988,9 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					lptr->name = PyString_FromString(tempchar2);
  					lptr->chr = PyString_FromString(tempchar);
                                         if (cptr->size >= MAX_MARKERS-1) {
+                                          sprintf(tempchar2,"reaper: memory error for MAX_MARKERS number of markers=%i",cptr->size);
                                           PyErr_SetString(PyExc_SystemError,
-                                                          "reaper: memory error for MAX_MARKERS");
+                                                          tempchar2);
                                           return NULL;
                                         }
  					cptr->size += 1;

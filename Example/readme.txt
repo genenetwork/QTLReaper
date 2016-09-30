@@ -1,12 +1,14 @@
+Note: the examples have moved into ./test
+
 To compile qtlreaper module, execute:
 
-    python setup.py build  
+    python setup.py build
 
 you may modify the setup.py script if you want to use your own blas and lapack
 
 To install qtlreaper module, execute:
 
-    python setup.py install  
+    python setup.py install
 
 
 Run the following command in python interpreter to test the module:
@@ -32,13 +34,13 @@ d = bxdGeno.add()
 bxdGeno.prgy
 #number of progeny
 bxdGeno.nprgy
-#1st Chromosome 
+#1st Chromosome
 bxdGeno[0].name
-#last Chromosome 
+#last Chromosome
 bxdGeno[-1].name
-#1st Locus 
+#1st Locus
 bxdGeno[0][0].name
-#last Locus 
+#last Locus
 bxdGeno[-1][-1].name
 
 ################
@@ -88,8 +90,8 @@ qtl4.sort()
 permu1 = bxdGeno.permutation(strains = strains, trait = trait,nperm=1000)
 permu2 = bxdGeno.permutation(strains = strains, trait = trait, variance = variance,nperm=1000)
 #progressive permutation
-#keep on doing permutation until the thresh LRS is not in the top 10 
-#or the total number of permutations reaches 1,000,000 
+#keep on doing permutation until the thresh LRS is not in the top 10
+#or the total number of permutations reaches 1,000,000
 permu3 = bxdGeno.permutation(strains = strains, trait = trait, thresh = 23)
 
 #calculate p-value
@@ -113,7 +115,7 @@ import string
 fp = open("../../Example/trait.txt")
 header = fp.readline()
 header = string.split(header)
-#strip any blank characters 
+#strip any blank characters
 header = map(string.strip, header)
 strains = header[1:]
 #the header here is the strain list
@@ -121,9 +123,7 @@ strains = header[1:]
 
 trait = fp.readline()
 trait = string.split(trait)
-#strip any blank characters 
+#strip any blank characters
 trait = map(string.strip, trait[1:])
 trait = map(float, trait)
 #the trait here is the trait valuelist
-
-
