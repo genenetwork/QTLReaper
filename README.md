@@ -41,6 +41,19 @@ and prepend that to the PYTHONPATH
 
     env PYTHONPATH=/home/wrk/tmp/lib/python2.7/site-packages:$PYTHONPATH python
 
+### Installing with GNU Guix
+
+QTLreaper has a package definition in https://gitlab.com/genenetwork/guix-bioinformatics and can be
+installed with
+
+    env GUIX_PACKAGE_PATH=~/guix-bioinformatics guix package -i python-qtlreaper
+
+after cloning that repository.
+
+Alternatively check out the source tree and use a Guix environment
+
+    guix environment bash -C --pure --ad-hoc gcc python --no-grafts
+    python3 setup.py build
 
 ## License
 
@@ -48,4 +61,4 @@ The QTLReaper source code is released under the GNU General Public License versi
 
 ## Author
 
-Jintao Wang, Ken Manly
+Jintao Wang and Ken Manly with compatibility and range checking updates by Pjotr Prins and Lei Yan

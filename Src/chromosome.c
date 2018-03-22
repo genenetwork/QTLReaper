@@ -14,10 +14,11 @@
 
     You should have received a copy of the GNU General Public License
     along with QTL Reaper; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include <Python.h>
+#include <pyconfig.h>
 #include "structmember.h"
 #include "geneobject.h"
 #include "regression.h"
@@ -57,7 +58,8 @@ Chromosome_dealloc(Chromosome* self){
 		}
 		PyMem_FREE(self->loci);
 	}
-	self->ob_type->tp_free((PyObject*)self);
+        PyObject *pyobj = (PyObject*)self;
+	pyobj->ob_type->tp_free(pyobj);
 	Py_TRASHCAN_SAFE_END(self);
 }
 
@@ -72,7 +74,7 @@ Chromosome_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 			return NULL;
 		}
 		self->loci = NULL;
-		self->size = 0;   
+		self->size = 0;
 	}
 	return (PyObject *)self;
 }
@@ -82,9 +84,9 @@ Chromosome_init(Chromosome *self, PyObject *args, PyObject *kwds){
 	int i;
 	PyObject *name=NULL, *loci=NULL, *temp;
 	static char *kwlist[] = {"name", "loci",NULL};
-	if (! PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist, 
+	if (! PyArg_ParseTupleAndKeywords(args, kwds, "|OO", kwlist,
                                       &name, &loci))
-		return -1; 
+		return -1;
 
 	if (name){
 		if (PyString_Check(name)){
@@ -93,11 +95,11 @@ Chromosome_init(Chromosome *self, PyObject *args, PyObject *kwds){
 			self->name = name;
 		}
 		else{
-      	PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string"); 
+      	PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string");
     		return -1;
 		}
 	}
-	
+
 	if (loci){
 		if (PyLocusList_Check(loci)){
 			if (self->loci != NULL){
@@ -114,7 +116,7 @@ Chromosome_init(Chromosome *self, PyObject *args, PyObject *kwds){
 			}
 		}
 		else{
-			PyErr_SetString(PyExc_TypeError, "The item attribute value must be a Locus list"); 
+			PyErr_SetString(PyExc_TypeError, "The item attribute value must be a Locus list");
 			return -1;
 		}
 	}
@@ -131,7 +133,7 @@ Chromosome_repr(Chromosome * self){
 		PyTuple_SetItem(loci, i, self->loci[i]);
 	}
 	locistr = PyObject_Repr(loci);
-	result = PyString_FromFormat("Chr(\"%s\", %s)", 
+	result = PyString_FromFormat("Chr(\"%s\", %s)",
 				PyString_AsString(self->name), PyString_AsString(locistr));
 	Py_DECREF(locistr);
 	Py_DECREF(loci);
@@ -162,13 +164,13 @@ Chromosome_setname(Chromosome *self, PyObject *value, void *closure){
 		return -1;
 	}
 	if (! PyString_Check(value)) {
-		PyErr_SetString(PyExc_TypeError, 
+		PyErr_SetString(PyExc_TypeError,
                     "The name attribute value must be a string");
 		return -1;
 	}
 	Py_DECREF(self->name);
 	Py_INCREF(value);
-	self->name = value;    
+	self->name = value;
 	return 0;
 }
 
@@ -207,7 +209,7 @@ Chromosome_setloci(Chromosome *self, PyObject *loci, void *closure){
 		}
 	}
 	else {
-		PyErr_SetString(PyExc_TypeError, 
+		PyErr_SetString(PyExc_TypeError,
 				"The loci attribute value must be a Locus list");
 		return -1;
 	}
@@ -215,10 +217,10 @@ Chromosome_setloci(Chromosome *self, PyObject *loci, void *closure){
 }
 
 static PyGetSetDef Chromosome_getseters[] = {
-	{"name", 
+	{"name",
 		(getter)Chromosome_getname, (setter)Chromosome_setname,
 		"name", NULL},
-	{"loci", 
+	{"loci",
 		(getter)Chromosome_getloci, (setter)Chromosome_setloci,
 		"loci", NULL},
 	{NULL}  /* Sentinel */
@@ -242,7 +244,7 @@ Chromosome_getItem(Chromosome *self, int i){
 	}
 	Py_INCREF(self->loci[i]);
 	return self->loci[i];
-}	
+}
 
 
 static PySequenceMethods Chromosome_as_sequence = {
@@ -285,7 +287,7 @@ PyTypeObject PyChromosome_Type = {
 	0,		               /* tp_weaklistoffset */
 	0,		               /* tp_iter */
 	0,		               /* tp_iternext */
-	Chromosome_methods,             /* tp_methods */    
+	Chromosome_methods,             /* tp_methods */
 	Chromosome_members,             /* tp_members */
 	Chromosome_getseters,           /* tp_getset */
 	0,                         /* tp_base */
@@ -297,4 +299,3 @@ PyTypeObject PyChromosome_Type = {
   	PyType_GenericAlloc,			/* tp_alloc */
 	Chromosome_new,                 /* tp_new */
 };
-
