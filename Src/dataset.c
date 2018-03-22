@@ -18,6 +18,7 @@
 */
 
 #include <Python.h>
+#include <bytesobject.h>
 #include "structmember.h"
 #include "geneobject.h"
 #include "regression.h"
@@ -104,10 +105,10 @@ Dataset_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
     self = (Dataset *)type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->name = PyString_FromString("Unknown_Dataset");
-        self->mat = PyString_FromString("mat");
-        self->pat = PyString_FromString("pat");
-        self->type = PyString_FromString("riset");
+        self->name = PyBytes_FromString("Unknown_Dataset");
+        self->mat = PyBytes_FromString("mat");
+        self->pat = PyBytes_FromString("pat");
+        self->type = PyBytes_FromString("riset");
         if (self->name == NULL || self->mat == NULL
         	||self->pat == NULL ||self->type == NULL)
           {
@@ -140,7 +141,7 @@ Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
         return -1;
 
     if (name){
-    	if (PyString_Check(name)) {
+    	if (PyBytes_Check(name)) {
         Py_XDECREF(self->name);
         Py_INCREF(name);
         self->name = name;
@@ -183,7 +184,7 @@ Dataset_repr(Dataset * self)
 
 	prgy = PyTuple_New(self->nprgy);
 	for (i=0;i<self->nprgy;i++)
-		PyTuple_SetItem(prgy, i, PyString_FromString(self->prgy[i]));
+		PyTuple_SetItem(prgy, i, PyBytes_FromString(self->prgy[i]));
 	prgystr = PyObject_Repr(prgy);
 
 	chromosome = PyTuple_New(self->size);
@@ -192,8 +193,8 @@ Dataset_repr(Dataset * self)
 		PyTuple_SetItem(chromosome, i, self->chromosome[i]);
 	}
 	chromosomestr = PyObject_Repr(chromosome);
-	result = PyString_FromFormat("Dataset(\"%s\", prgy%s, %s)",
-                               PyString_AsString(self->name), PyString_AsString(prgystr), PyString_AsString(chromosomestr));
+	result = PyBytes_FromFormat("Dataset(\"%s\", prgy%s, %s)",
+                               PyBytes_AsString(self->name), PyBytes_AsString(prgystr), PyBytes_AsString(chromosomestr));
 	Py_DECREF(chromosomestr);
 	Py_DECREF(chromosome);
 	Py_DECREF(prgystr);
@@ -283,7 +284,7 @@ Dataset_setname(Dataset *self, PyObject *value, void *closure)
     return -1;
   }
 
-  if (! PyString_Check(value)) {
+  if (! PyBytes_Check(value)) {
     PyErr_SetString(PyExc_TypeError,
                     "reaper: The name attribute value must be a string");
     return -1;
@@ -349,7 +350,7 @@ Dataset_getprgy(Dataset *self, void *closure)
 	PyObject *prgy;
 	prgy = PyTuple_New(self->nprgy);
 	for (i=0;i<self->nprgy;i++)
-		PyTuple_SetItem(prgy, i, PyString_FromString(self->prgy[i]));
+		PyTuple_SetItem(prgy, i, PyBytes_FromString(self->prgy[i]));
 	return prgy;
 }
 
@@ -541,7 +542,7 @@ Reaper_anova(PyObject *self, PyObject *args){
 	k = 0;
 	for (i=0;i<n;i++){
 		item = PyList_GET_ITEM(lst, i);
-		if (PyFloat_Check(item) || PyInt_Check(item)){
+		if (PyFloat_Check(item) || PyLong_Check(item)){
 			temp[k] = PyFloat_AsDouble(item);
 			k++;
 		}
@@ -615,8 +616,28 @@ initreaper(void)
     if (PyType_Ready(&PyQTL_Type) < 0)
         return;
 
+#if PY_MAJOR_VERSION >= 3
+    static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "reaper",     /* m_name */
+        "QTL Reaper Module",  /* m_doc */
+        -1,                  /* m_size */
+        Reaper_module_methods, /* m_methods */
+        NULL,                /* m_reload */
+        NULL,                /* m_traverse */
+        NULL,                /* m_clear */
+        NULL,                /* m_free */
+    };
+#endif
+
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&moduledef);
+#else
     m = Py_InitModule3("reaper", Reaper_module_methods,
                        "QTL Reaper Module");
+#endif
+
+
 
     if (m == NULL)
       return;
@@ -675,10 +696,10 @@ Dataset_addparentsf1(Dataset* self, PyObject *args, PyObject *kwds)
 
     self2 = PyObject_GC_New(Dataset, &PyDataset_Type);
     if (self2 != NULL) {
-        self2->name = PyString_FromString(PyString_AsString(self->name));
-        self2->mat = PyString_FromString(PyString_AsString(self->mat));
-        self2->pat = PyString_FromString(PyString_AsString(self->pat));
-        self2->type = PyString_FromString(PyString_AsString(self->type));
+        self2->name = PyBytes_FromString(PyBytes_AsString(self->name));
+        self2->mat = PyBytes_FromString(PyBytes_AsString(self->mat));
+        self2->pat = PyBytes_FromString(PyBytes_AsString(self->pat));
+        self2->type = PyBytes_FromString(PyBytes_AsString(self->type));
         if (self2->name == NULL || self2->mat == NULL
         	||self2->pat == NULL ||self2->type == NULL)
           {
@@ -750,10 +771,10 @@ Dataset_addinterval(Dataset* self, PyObject *args, PyObject *kwds)
 
     self2 = PyObject_GC_New(Dataset, &PyDataset_Type);
     if (self2 != NULL) {
-        self2->name = PyString_FromString(PyString_AsString(self->name));
-        self2->mat = PyString_FromString(PyString_AsString(self->mat));
-        self2->pat = PyString_FromString(PyString_AsString(self->pat));
-        self2->type = PyString_FromString(PyString_AsString(self->type));
+        self2->name = PyBytes_FromString(PyBytes_AsString(self->name));
+        self2->mat = PyBytes_FromString(PyBytes_AsString(self->mat));
+        self2->pat = PyBytes_FromString(PyBytes_AsString(self->pat));
+        self2->type = PyBytes_FromString(PyBytes_AsString(self->type));
         if (self2->name == NULL || self2->mat == NULL
         	||self2->pat == NULL ||self2->type == NULL){
             Py_DECREF(self2);
@@ -809,7 +830,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
         return NULL;
 
     if (file){
-    	filename = PyString_AS_STRING(file);
+    	filename = PyBytes_AS_STRING(file);
     	printf("reaper: parsing %s\n", filename);
     	fp = fopen(filename,"rb");
     	if (fp == NULL){
@@ -857,14 +878,14 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  			if (buffer[i] != '\0'){
  				if (strncmp( buffer, "@type", strlen("@type")) == 0){
  					Py_DECREF(self->type);
- 					self->type = PyString_FromString(buffer +i +1);
+ 					self->type = PyBytes_FromString(buffer +i +1);
  					if (strncmp(buffer +i +1, "intercross", strlen("intercross")) == 0)
  						self->dominance = 1;
  				}
  				else if (strncmp( buffer, "@mat", strlen("@mat")) == 0){
  					Py_DECREF(self->mat);
 
- 					self->mat = PyString_FromString(buffer +i +1);
+ 					self->mat = PyBytes_FromString(buffer +i +1);
                                         if (strlen(buffer +i +1)>MAX_GENONAME_SIZE-1) {
                                           PyErr_SetString(PyExc_SystemError,
                                                           "reaper: Memory error for mat MAX_GENONAME_SIZE");
@@ -876,7 +897,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				}
  				else if (strncmp( buffer, "@pat", strlen("@pat")) == 0){
  					Py_DECREF(self->pat);
- 					self->pat = PyString_FromString(buffer +i +1);
+ 					self->pat = PyBytes_FromString(buffer +i +1);
                                         if (strlen(buffer +i +1)>MAX_GENONAME_SIZE-1) {
                                           PyErr_SetString(PyExc_SystemError,
                                                           "reaper: Memory error for pat MAX_GENONAME_SIZE");
@@ -905,7 +926,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  				}
  				else if (strncmp( buffer, "@name", strlen("@name")) == 0){
  					Py_DECREF(self->name);
- 					self->name = PyString_FromString(buffer +i +1);
+ 					self->name = PyBytes_FromString(buffer +i +1);
  				}
  			}
  		}
@@ -968,7 +989,7 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  						tempchar[i-k] = '\0';
  						cptr = (Chromosome *)(self->chromosome[self->size]);
  						Py_DECREF(cptr->name);
- 						cptr->name = PyString_FromString(tempchar);
+ 						cptr->name = PyBytes_FromString(tempchar);
 						// For each chromosome, the limit of markers was 500, and now it is MAX_MARKERS.
  						cptr->loci = (PyObject **)malloc(MAX_MARKERS*sizeof(PyObject *));
  						self->size += 1;
@@ -988,8 +1009,8 @@ Dataset_readFromFile(Dataset* self, PyObject *args)
  					lptr->txtstr = (char *)malloc((lptr->size)*sizeof(char));
  					strncpy(tempchar2, buffer+k, i-k);
  					tempchar2[i-k] = '\0';
- 					lptr->name = PyString_FromString(tempchar2);
- 					lptr->chr = PyString_FromString(tempchar);
+ 					lptr->name = PyBytes_FromString(tempchar2);
+ 					lptr->chr = PyBytes_FromString(tempchar);
                                         if (cptr->size >= MAX_MARKERS-1) {
                                           sprintf(tempchar2,"reaper: memory error for MAX_MARKERS number of markers=%i",cptr->size);
                                           PyErr_SetString(PyExc_SystemError,
@@ -1178,7 +1199,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			&strain, &value, &variance, &control))
 		return NULL;
 
-	if (!PyStringList_Check(strain)){
+	if (!PyBytesList_Check(strain)){
 		PyErr_SetString(PyExc_TypeError, "reaper: Strains must be a string list");
 		return NULL;
 	}
@@ -1190,7 +1211,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 		PyErr_SetString(PyExc_TypeError, "reaper: Variance must be a number list");
 		return NULL;
 	}
-	if (control != NULL && !PyString_Check(control)){
+	if (control != NULL && !PyBytes_Check(control)){
 		PyErr_SetString(PyExc_TypeError, "reaper: Control must be a string");
 		return NULL;
 	}
@@ -1201,8 +1222,8 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			cptr = (Chromosome *)(self->chromosome[i]);
 			for (j=0;j<cptr->size;j++){
 				ctrlptr = (Locus *)(cptr->loci[j]);
-				tempchar = PyString_AsString(ctrlptr->name);
-				if (strcmp(tempchar, PyString_AsString(control)) == 0)
+				tempchar = PyBytes_AsString(ctrlptr->name);
+				if (strcmp(tempchar, PyBytes_AsString(control)) == 0)
 					{located = 1; break;}
 			}
 			if (located) break;
@@ -1229,7 +1250,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 	for (i=0;i<n;i++){
 		located = 0;
 		for (j=0;j<self->nprgy;j++){
-			tempchar = PyString_AsString(PyList_GET_ITEM(strain, i));
+			tempchar = PyBytes_AsString(PyList_GET_ITEM(strain, i));
 			if (strcmp(self->prgy[j],tempchar) == 0)
 				{located = 1; break;}
 		}
@@ -1239,7 +1260,7 @@ Dataset_regression(Dataset *self, PyObject *args, PyObject *kwds){
 			return NULL;
 		}
 		else{
-			//printf("%s---%s  %d---%d\n", self->prgy[j], PyString_AsString(PyList_GET_ITEM(strain, i)), i, j);
+			//printf("%s---%s  %d---%d\n", self->prgy[j], PyBytes_AsString(PyList_GET_ITEM(strain, i)), i, j);
 			tempindex[i] = j;
 		}
 		YY[i]=PyFloat_AsDouble(PyList_GET_ITEM(value, i));
@@ -1333,7 +1354,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 			&strain, &value, &variance, &N_test, &LRSThresh, &topN))
 		return NULL;
 
-	if (!PyStringList_Check(strain)){
+	if (!PyBytesList_Check(strain)){
 		PyErr_SetString(PyExc_TypeError, "reaper: Strains must be a string list");
 		return NULL;
 	}
@@ -1368,7 +1389,7 @@ Dataset_permutation(Dataset *self, PyObject *args, PyObject *kwds){
 	for (i=0;i<n;i++){
 		located = 0;
 		for (j=0;j<self->nprgy;j++){
-			tempchar = PyString_AsString(PyList_GET_ITEM(strain, i));
+			tempchar = PyBytes_AsString(PyList_GET_ITEM(strain, i));
 			if (strcmp(self->prgy[j],tempchar) == 0)
 				{located = 1; break;}
 		}
@@ -1508,7 +1529,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 			&strain, &value, &variance, &control, &N_test))
 		return NULL;
 
-	if (!PyStringList_Check(strain)){
+	if (!PyBytesList_Check(strain)){
 		PyErr_SetString(PyExc_TypeError, "reaper: Strains must be a string list");
 		return NULL;
 	}
@@ -1556,7 +1577,7 @@ Dataset_bootstrap(Dataset *self, PyObject *args, PyObject *kwds){
 	for (i=0;i<n;i++){
 		located = 0;
 		for (j=0;j<self->nprgy;j++){
-			tempchar = PyString_AsString(PyList_GET_ITEM(strain, i));
+			tempchar = PyBytes_AsString(PyList_GET_ITEM(strain, i));
 			if (strcmp(self->prgy[j],tempchar) == 0)
 				{located = 1; break;}
 		}

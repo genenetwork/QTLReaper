@@ -19,6 +19,7 @@
 
 #include <Python.h>
 #include <pyconfig.h>
+#include <bytesobject.h>
 #include "structmember.h"
 #include "geneobject.h"
 #include "regression.h"
@@ -68,7 +69,7 @@ Chromosome_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 	Chromosome *self;
 	self = (Chromosome *)type->tp_alloc(type, 0);
 	if (self != NULL) {
-		self->name = PyString_FromString("Unknown_Chr");
+		self->name = PyBytes_FromString("Unknown_Chr");
 		if (self->name == NULL){
 			Py_DECREF(self);
 			return NULL;
@@ -89,7 +90,7 @@ Chromosome_init(Chromosome *self, PyObject *args, PyObject *kwds){
 		return -1;
 
 	if (name){
-		if (PyString_Check(name)){
+		if (PyBytes_Check(name)){
 			Py_XDECREF(self->name);
 			Py_INCREF(name);
 			self->name = name;
@@ -133,8 +134,8 @@ Chromosome_repr(Chromosome * self){
 		PyTuple_SetItem(loci, i, self->loci[i]);
 	}
 	locistr = PyObject_Repr(loci);
-	result = PyString_FromFormat("Chr(\"%s\", %s)",
-				PyString_AsString(self->name), PyString_AsString(locistr));
+	result = PyBytes_FromFormat("Chr(\"%s\", %s)",
+				PyBytes_AsString(self->name), PyBytes_AsString(locistr));
 	Py_DECREF(locistr);
 	Py_DECREF(loci);
 	return result;
@@ -163,7 +164,7 @@ Chromosome_setname(Chromosome *self, PyObject *value, void *closure){
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the name attribute");
 		return -1;
 	}
-	if (! PyString_Check(value)) {
+	if (! PyBytes_Check(value)) {
 		PyErr_SetString(PyExc_TypeError,
                     "The name attribute value must be a string");
 		return -1;

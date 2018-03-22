@@ -78,7 +78,7 @@ int PyNumList_Check(PyObject *pObj){
 	j = 1;
 	for (i = 0; i < PyList_GET_SIZE(pObj); ++i) {
 		item = PyList_GET_ITEM(pObj, i);
-		if (PyFloat_Check(item) || PyInt_Check(item))
+		if (PyFloat_Check(item) || PyLong_Check(item))
 			continue;
 		else{
 			j = 0;
@@ -96,7 +96,7 @@ int PyStringList_Check(PyObject *pObj){
 	j = 1;
 	for (i = 0; i < PyList_GET_SIZE(pObj); ++i) {
 		item = PyList_GET_ITEM(pObj, i);
-		if (PyString_Check(item))
+		if (PyBytes_Check(item))
 			continue;
 		else{
 			j = 0;
@@ -157,8 +157,8 @@ PyLocus_New(){
 	op->genotype = NULL;
 	op->dominance = NULL;
 	op->txtstr = NULL;
-	op->name = PyString_FromString("");
-	op->chr = PyString_FromString("");
+	op->name = PyBytes_FromString("");
+	op->chr = PyBytes_FromString("");
 	PyObject_GC_Track(op);
 	return (PyObject *) op;
 }
@@ -173,7 +173,7 @@ PyChromosome_New(){
 	}
 	op->size = 0;
 	op->loci = NULL;
-	op->name = PyString_FromString("Unknown_Chr");
+	op->name = PyBytes_FromString("Unknown_Chr");
 	PyObject_GC_Track(op);
 	return (PyObject *) op;
 }
@@ -248,8 +248,8 @@ Locus_addparentsf1(Locus* locus, char *strainName, double *value, int n){
 		if (locus->dominance != NULL) op->dominance[i] = locus->dominance[i-n];
 	}
 
-	op->name = PyString_FromString(PyString_AsString(locus->name));
-	op->chr = PyString_FromString(PyString_AsString(locus->chr));
+	op->name = PyBytes_FromString(PyBytes_AsString(locus->name));
+	op->chr = PyBytes_FromString(PyBytes_AsString(locus->chr));
 	PyObject_GC_Track(op);
 	return (PyObject *) op;
 }
@@ -267,7 +267,7 @@ Chromosome_addparentsf1(Chromosome* chr, char *strainName, double *value, int n)
 	for (i=0;i<op->size;i++){
 		op->loci[i] = Locus_addparentsf1((Locus *)(chr->loci[i]), strainName, value, n);
 	}
-	op->name = PyString_FromString(PyString_AsString(chr->name));
+	op->name = PyBytes_FromString(PyBytes_AsString(chr->name));
 	PyObject_GC_Track(op);
 	return (PyObject *) op;
 }
@@ -293,7 +293,7 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 	}
 	op->size = 0;
 	op->loci = (PyObject **)malloc(MAX_LOCI*sizeof(PyObject *));
-	//printf("\n\nChr %s\n", PyString_AsString(chr->name));
+	//printf("\n\nChr %s\n", PyBytes_AsString(chr->name));
 	for (i = 0; i < chr->size; i++){
           if (i >= MAX_LOCI) {
             PyErr_SetString(PyExc_SystemError,
@@ -301,7 +301,7 @@ Chromosome_addinterval(Chromosome* chr, double interval){
             return NULL;
           }
 		curLocus = (Locus *)(chr->loci[i]);
-		chrName = PyString_AsString(curLocus->chr);
+		chrName = PyBytes_AsString(curLocus->chr);
 		curCM = curLocus->cM;
 		curMb = curLocus->Mb;
 		if (i == chr->size -1){
@@ -332,7 +332,7 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 
 
 			if (k>0){
-				lcus->name = PyString_FromString(" - ");
+				lcus->name = PyBytes_FromString(" - ");
 
 				for (j=0;j<lcus->size;j++){
 
@@ -413,14 +413,14 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 				}
 			}
 			else{
-				lcus->name = PyString_FromString(PyString_AsString(curLocus->name));
+				lcus->name = PyBytes_FromString(PyBytes_AsString(curLocus->name));
 				for (j=0;j<lcus->size;j++){
 					lcus->genotype[j] = curLocus->genotype[j];
 					lcus->txtstr[j] = curLocus->txtstr[j];
 					if (lcus->dominance != NULL) lcus->dominance[j] = curLocus->dominance[j];
 				}
 			}
-			lcus->chr = PyString_FromString(chrName);
+			lcus->chr = PyBytes_FromString(chrName);
 			PyObject_GC_Track(lcus);
 			op->loci[op->size] = (PyObject *) lcus;
 			op->size++;
@@ -432,7 +432,7 @@ Chromosome_addinterval(Chromosome* chr, double interval){
 		while(curCM < nextLocus->cM);
 	}
 
-	op->name = PyString_FromString(PyString_AsString(chr->name));
+	op->name = PyBytes_FromString(PyBytes_AsString(chr->name));
 	PyObject_GC_Track(op);
 	return (PyObject *) op;
 }

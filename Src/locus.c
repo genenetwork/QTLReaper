@@ -57,13 +57,13 @@ Locus_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 	self = (Locus *)type->tp_alloc(type, 0);
 
 	if (self != NULL) {
-		self->name = PyString_FromString("Unknown_Locus");
+		self->name = PyBytes_FromString("Unknown_Locus");
 
 		if (self->name == NULL){
 			Py_DECREF(self);
 			return NULL;
 		}
-		self->chr = PyString_FromString("Unknown_Chr");
+		self->chr = PyBytes_FromString("Unknown_Chr");
 
 		if (self->chr == NULL){
 			Py_DECREF(self);
@@ -91,7 +91,7 @@ Locus_init(Locus *self, PyObject *args, PyObject *kwds){
 		return -1;
 
 	if (name){
-		if (PyString_Check(name)) {
+		if (PyBytes_Check(name)) {
 			Py_XDECREF(self->name);
 			Py_INCREF(name);
 			self->name = name;
@@ -103,7 +103,7 @@ Locus_init(Locus *self, PyObject *args, PyObject *kwds){
 	}
 
 	if (chr){
-		if (PyString_Check(chr)){
+		if (PyBytes_Check(chr)){
 			Py_XDECREF(self->chr);
 			Py_INCREF(chr);
 			self->chr = chr;
@@ -141,8 +141,8 @@ Locus_repr(Locus * self){
 		PyTuple_SetItem(genotype, i, Py_BuildValue("d",self->genotype[i]));
 	genotypestr = PyObject_Repr(genotype);
 	sprintf(buffer, "%2.2f",self->cM);
-	result = PyString_FromFormat("Locus(\"%s\", %s, cM = %s, chr = %s)", PyString_AsString(self->name),
-						PyString_AsString(genotypestr),buffer, PyString_AsString(self->chr));
+	result = PyBytes_FromFormat("Locus(\"%s\", %s, cM = %s, chr = %s)", PyBytes_AsString(self->name),
+						PyBytes_AsString(genotypestr),buffer, PyBytes_AsString(self->chr));
 	Py_DECREF(genotypestr);
 	Py_DECREF(genotype);
 	return result;
@@ -189,7 +189,7 @@ Locus_setname(Locus *self, PyObject *value, void *closure){
 		return -1;
 	}
 
-	if (! PyString_Check(value)) {
+	if (! PyBytes_Check(value)) {
 		PyErr_SetString(PyExc_TypeError,
 					"The name attribute value must be a string");
 		return -1;

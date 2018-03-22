@@ -74,7 +74,7 @@ void strstrip(char* str);
 int charcount(char* str, char c);
 
 int PyNumList_Check(PyObject *pObj);
-int PyStringList_Check(PyObject *pObj);
+int PyBytesList_Check(PyObject *pObj);
 int PyLocusList_Check(PyObject *pObj);
 int PyChromosomeList_Check(PyObject *pObj);
 

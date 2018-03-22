@@ -94,9 +94,9 @@ QTL_repr(QTL * self){
 	char buffer2[20];
 	sprintf(buffer, "%2.3f", self->lrs);
 	sprintf(buffer2, "%2.3f", self->additive);
-	return PyString_FromFormat("QTL (Locus: \"%s\", Chr: %s, LRS: %s, Additive: %s)",
-				PyString_AsString(((Locus *)(self->locus))->name),
-				PyString_AsString(((Locus *)(self->locus))->chr),
+	return PyBytes_FromFormat("QTL (Locus: \"%s\", Chr: %s, LRS: %s, Additive: %s)",
+				PyBytes_AsString(((Locus *)(self->locus))->name),
+				PyBytes_AsString(((Locus *)(self->locus))->chr),
 				buffer, buffer2);
 }
 
