@@ -88,7 +88,7 @@ int PyNumList_Check(PyObject *pObj){
 	return j;
 }
 
-int PyStringList_Check(PyObject *pObj){
+int PyBytesList_Check(PyObject *pObj){
 	int i, j;
 	PyObject * item;
 	if (!PyList_Check(pObj))

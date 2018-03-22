@@ -601,8 +601,12 @@ static PyMethodDef Reaper_module_methods[] = {
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC
-initreaper(void)
+
+#ifdef PY_MAJOR_VERSION >= 3
+extern PyObject *PyInit_myextension(void)
+#else
+PyMODINIT_FUNC initreaper(void)
+#endif
 {
     PyObject* m;
 
@@ -651,6 +655,10 @@ initreaper(void)
     PyModule_AddObject(m, "Locus", (PyObject *)&PyLocus_Type);
     PyModule_AddObject(m, "Chromosome", (PyObject *)&PyChromosome_Type);
     PyModule_AddObject(m, "QTL", (PyObject *)&PyQTL_Type);
+
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
 }
 
 /*member function start from here*/

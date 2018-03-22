@@ -2,10 +2,17 @@ from setuptools import setup, Extension
 
 module1 = Extension('reaper',
                     include_dirs = ["Include"],
-                    sources = ["Src/blas_lite.c", "Src/chromosome.c",
-                               "Src/dataset.c", "Src/dlapack_lite.c", "Src/f2c_lite.c",
-                               "Src/geneutil.c", "Src/locus.c", "Src/normprob.c",
-                               "Src/qtlobject.c", "Src/regression.c"],
+                    sources = ["Src/dataset.c",
+                               "Src/chromosome.c",
+                               "Src/geneutil.c",
+                               "Src/locus.c",
+                               "Src/normprob.c",
+                               "Src/qtlobject.c",
+                               "Src/regression.c",
+                               "Src/f2c_lite.c",
+                               "Src/blas_lite.c",
+                               "Src/dlapack_lite.c",
+                    ],
                     extra_compile_args=["-Wfatal-errors", "-Werror=implicit-function-declaration"]
                     # extra_compile_args=["-Wfatal-errors", "-Werror"]
 )
