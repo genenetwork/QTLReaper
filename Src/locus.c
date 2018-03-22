@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with QTL Reaper; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include <Python.h>
@@ -46,7 +46,8 @@ Locus_dealloc(Locus* self){
 		PyMem_FREE(self->dominance);
 	if (self->txtstr != NULL)
 		PyMem_FREE(self->txtstr);
-	self->ob_type->tp_free((PyObject*)self);
+        PyObject *obj  = (PyObject*)self;
+	obj->ob_type->tp_free(obj);
 	Py_TRASHCAN_SAFE_END(self);
 }
 
@@ -54,16 +55,16 @@ static PyObject *
 Locus_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 	Locus *self;
 	self = (Locus *)type->tp_alloc(type, 0);
-	
+
 	if (self != NULL) {
 		self->name = PyString_FromString("Unknown_Locus");
-	
+
 		if (self->name == NULL){
 			Py_DECREF(self);
 			return NULL;
 		}
 		self->chr = PyString_FromString("Unknown_Chr");
-	
+
 		if (self->chr == NULL){
 			Py_DECREF(self);
 			return NULL;
@@ -75,7 +76,7 @@ Locus_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 		self->cM = 0.0;
 		self->Mb = 0.0;
 	}
-	
+
 	return (PyObject *)self;
 }
 
@@ -85,9 +86,9 @@ Locus_init(Locus *self, PyObject *args, PyObject *kwds){
 	PyObject *name=NULL, *genotype=NULL, *chr=NULL;
 	static char *kwlist[] = {"name", "genotype", "chr", "cM", "Mb", NULL};
 
-	if (! PyArg_ParseTupleAndKeywords(args, kwds, "|OOOdd", kwlist, 
+	if (! PyArg_ParseTupleAndKeywords(args, kwds, "|OOOdd", kwlist,
 			&name, &genotype, &chr, &self->cM, &self->Mb))
-		return -1; 
+		return -1;
 
 	if (name){
 		if (PyString_Check(name)) {
@@ -96,11 +97,11 @@ Locus_init(Locus *self, PyObject *args, PyObject *kwds){
 			self->name = name;
 		}
 		else{
-			PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string"); 
+			PyErr_SetString(PyExc_TypeError, "The name attribute value must be a string");
 			return -1;
 		}
 	}
-	
+
 	if (chr){
 		if (PyString_Check(chr)){
 			Py_XDECREF(self->chr);
@@ -108,7 +109,7 @@ Locus_init(Locus *self, PyObject *args, PyObject *kwds){
 			self->chr = chr;
 		}
 		else{
-			PyErr_SetString(PyExc_TypeError, "The chr attribute value must be a string"); 
+			PyErr_SetString(PyExc_TypeError, "The chr attribute value must be a string");
 			return -1;
 		}
 	}
@@ -123,7 +124,7 @@ Locus_init(Locus *self, PyObject *args, PyObject *kwds){
 				self->genotype[i]=PyFloat_AsDouble(PyList_GET_ITEM(genotype, i));
 		}
 		else{
-	  		PyErr_SetString(PyExc_TypeError, "The genotype attribute value must be a numbered list"); 
+	  		PyErr_SetString(PyExc_TypeError, "The genotype attribute value must be a numbered list");
 			return -1;
 		}
 	}
@@ -140,7 +141,7 @@ Locus_repr(Locus * self){
 		PyTuple_SetItem(genotype, i, Py_BuildValue("d",self->genotype[i]));
 	genotypestr = PyObject_Repr(genotype);
 	sprintf(buffer, "%2.2f",self->cM);
-	result = PyString_FromFormat("Locus(\"%s\", %s, cM = %s, chr = %s)", PyString_AsString(self->name), 
+	result = PyString_FromFormat("Locus(\"%s\", %s, cM = %s, chr = %s)", PyString_AsString(self->name),
 						PyString_AsString(genotypestr),buffer, PyString_AsString(self->chr));
 	Py_DECREF(genotypestr);
 	Py_DECREF(genotype);
@@ -187,16 +188,16 @@ Locus_setname(Locus *self, PyObject *value, void *closure){
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the name attribute");
 		return -1;
 	}
-  
+
 	if (! PyString_Check(value)) {
-		PyErr_SetString(PyExc_TypeError, 
+		PyErr_SetString(PyExc_TypeError,
 					"The name attribute value must be a string");
 		return -1;
 	}
-	  
+
 	Py_DECREF(self->name);
 	Py_INCREF(value);
-	self->name = value;	
+	self->name = value;
 	return 0;
 }
 
@@ -247,7 +248,7 @@ Locus_setgenotype(Locus *self, PyObject *genotype, void *closure){
 		PyErr_SetString(PyExc_TypeError, "Cannot delete the genotype attribute");
 		return -1;
 	}
-	
+
 	if (PyNumList_Check(genotype)){
 		if (self->genotype != NULL)
 			free(self->genotype);
@@ -257,32 +258,32 @@ Locus_setgenotype(Locus *self, PyObject *genotype, void *closure){
 			self->genotype[i] = PyFloat_AsDouble(PyList_GET_ITEM(genotype, i));
 	}
 	else{
-		PyErr_SetString(PyExc_TypeError, "The genotype attribute value must be a numbered list"); 
+		PyErr_SetString(PyExc_TypeError, "The genotype attribute value must be a numbered list");
 		return -1;
 	}
 	return 0;
 }
 
 static PyGetSetDef Locus_getseters[] = {
-	{"chr", 
+	{"chr",
 		(getter)Locus_getchr, (setter)Locus_nosetattr,
 		"chromosme", NULL},
-	{"cM", 
+	{"cM",
 		(getter)Locus_getcM, (setter)Locus_nosetattr,
 		"cent Morgan", NULL},
-	{"Mb", 
+	{"Mb",
 		(getter)Locus_getMb, (setter)Locus_nosetattr,
 		"Mega baspair", NULL},
-	{"name", 
+	{"name",
 		(getter)Locus_getname, (setter)Locus_setname,
 		"name", NULL},
-	{"dominance", 
+	{"dominance",
 		(getter)Locus_getdominance, (setter)Locus_nosetattr,
 		"dominance", NULL},
-	{"genotext", 
+	{"genotext",
 		(getter)Locus_gettxtstr, (setter)Locus_nosetattr,
 		"text str", NULL},
-	{"genotype", 
+	{"genotype",
 		(getter)Locus_getgenotype, (setter)Locus_nosetattr,
 		"genotype", NULL},
 	{NULL}  /* Sentinel */
@@ -304,16 +305,16 @@ Locus_getItem(Locus *self, int i){
 		return NULL;
 	}
 		return Py_BuildValue("d",self->genotype[i]);
-}	
+}
 
 static PySequenceMethods Locus_as_sequence = {
 	(inquiry)Locus_length,		/*sq_length*/
 	(binaryfunc)0,					/*sq_concat*/
-	(intargfunc)0,					/*sq_repeat*/
-	(intargfunc)Locus_getItem,					/*sq_item*/
-	(intintargfunc)0,				/*sq_slice*/
-	(intobjargproc)0,			   /*sq_ass_item*/
-	(intintobjargproc)0,			/*sq_ass_slice*/
+	(ssizeargfunc)0,					/*sq_repeat*/
+	(ssizeargfunc)Locus_getItem,					/*sq_item*/
+	(ssizessizeargfunc)0,				/*sq_slice*/
+	(ssizeobjargproc)0,			   /*sq_ass_item*/
+	(ssizessizeobjargproc)0,			/*sq_ass_slice*/
 };
 
 
@@ -346,7 +347,7 @@ PyTypeObject PyLocus_Type = {
 	0,					   /* tp_weaklistoffset */
 	0,					   /* tp_iter */
 	0,					   /* tp_iternext */
-	Locus_methods,			 /* tp_methods */	
+	Locus_methods,			 /* tp_methods */
 	Locus_members,			 /* tp_members */
 	Locus_getseters,		   /* tp_getset */
 	0,						 /* tp_base */
@@ -358,4 +359,3 @@ PyTypeObject PyLocus_Type = {
 	PyType_GenericAlloc,						 /* tp_alloc */
 	Locus_new,				 /* tp_new */
 };
-

@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with QTL Reaper; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include <Python.h>
@@ -41,7 +41,8 @@ QTL_dealloc(QTL* self){
 	PyObject_GC_UnTrack(self);
 	Py_TRASHCAN_SAFE_BEGIN(self);
 	Py_XDECREF(self->locus);
-	self->ob_type->tp_free((PyObject*)self);
+        PyObject *obj = self;
+        obj->ob_type->tp_free(obj);
 	Py_TRASHCAN_SAFE_END(self);
 }
 
@@ -58,7 +59,7 @@ QTL_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 		}
 		self->lrs = 0.0;
 		self->additive = 0.0;
-		self->dominance = -1.0;  
+		self->dominance = -1.0;
 	}
 	return (PyObject *)self;
 }
@@ -68,9 +69,9 @@ QTL_init(QTL *self, PyObject *args, PyObject *kwds){
 	int i;
 	PyObject *locus=NULL;
 	static char *kwlist[] = {"locus", "lrs", "additive", "dominance", NULL};
-	if (! PyArg_ParseTupleAndKeywords(args, kwds, "|Oddd", kwlist, 
+	if (! PyArg_ParseTupleAndKeywords(args, kwds, "|Oddd", kwlist,
                                       &locus, &self->lrs, &self->additive, &self->dominance))
-		return -1; 
+		return -1;
 
 	if (locus){
 		if (PyLocus_Check(locus)){
@@ -79,11 +80,11 @@ QTL_init(QTL *self, PyObject *args, PyObject *kwds){
 			self->locus = locus;
 		}
 		else{
-      	PyErr_SetString(PyExc_TypeError, "The Locus attribute must be a locus object"); 
+      	PyErr_SetString(PyExc_TypeError, "The Locus attribute must be a locus object");
     		return -1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -93,8 +94,8 @@ QTL_repr(QTL * self){
 	char buffer2[20];
 	sprintf(buffer, "%2.3f", self->lrs);
 	sprintf(buffer2, "%2.3f", self->additive);
-	return PyString_FromFormat("QTL (Locus: \"%s\", Chr: %s, LRS: %s, Additive: %s)", 
-				PyString_AsString(((Locus *)(self->locus))->name), 
+	return PyString_FromFormat("QTL (Locus: \"%s\", Chr: %s, LRS: %s, Additive: %s)",
+				PyString_AsString(((Locus *)(self->locus))->name),
 				PyString_AsString(((Locus *)(self->locus))->chr),
 				buffer, buffer2);
 }
@@ -132,16 +133,16 @@ QTL_getadd(QTL *self, void *closure){
 
 
 static PyGetSetDef QTL_getseters[] = {
-	{"dominance", 
+	{"dominance",
 		(getter)QTL_getdominance, (setter)QTL_nosetattr,
 		"dominance", NULL},
-	{"locus", 
+	{"locus",
 		(getter)QTL_getlocus, (setter)QTL_nosetattr,
 		"locus", NULL},
-	{"lrs", 
+	{"lrs",
 		(getter)QTL_getlrs, (setter)QTL_nosetattr,
 		"lrs", NULL},
-	{"additive", 
+	{"additive",
 		(getter)QTL_getadd, (setter)QTL_nosetattr,
 		"additive", NULL},
 	{NULL}  /* Sentinel */
@@ -175,7 +176,7 @@ PyTypeObject PyQTL_Type = {
 	0,                         /*tp_print*/
 	0,                         /*tp_getattr*/
 	0,                         /*tp_setattr*/
-	(cmpfunc )QTL_compare,		/*tp_compare*/
+	// (tp_richcompare)QTL_compare,		/*tp_compare*/
 	(reprfunc)QTL_repr,    /*tp_repr*/
 	0,                         /*tp_as_numbe&*/
 	0,                         /*tp_as_sequence*/
@@ -194,7 +195,7 @@ PyTypeObject PyQTL_Type = {
 	0,		               /* tp_weaklistoffset */
 	0,		               /* tp_iter */
 	0,		               /* tp_iternext */
-	QTL_methods,             /* tp_methods */    
+	QTL_methods,             /* tp_methods */
 	QTL_members,             /* tp_members */
 	QTL_getseters,           /* tp_getset */
 	0,                         /* tp_base */
@@ -206,4 +207,3 @@ PyTypeObject PyQTL_Type = {
   	PyType_GenericAlloc,			/* tp_alloc */
 	QTL_new,                 /* tp_new */
 };
-

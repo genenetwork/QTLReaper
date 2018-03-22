@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 import os
 import string
@@ -28,7 +28,7 @@ line = fp.readline()
 while line:
 	line = map(string.strip, line.strip().split("\t"))
 	traitName = line[0]
-	print "Calculate Trait %s" % traitName
+	print("Calculate Trait %s" % traitName)
 	_traitData = map(float, line[DataStart:])
 
 	qtlresults = genotype.regression(strains = _strains, trait = _traitData)

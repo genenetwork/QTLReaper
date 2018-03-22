@@ -92,8 +92,9 @@ Dataset_dealloc(Dataset* self)
     	free(self->prgy);
     }
 
-    self->ob_type->tp_free((PyObject*)self);
-	Py_TRASHCAN_SAFE_END(self)
+    PyObject *obj = (PyObject*)self;
+    obj->ob_type->tp_free(obj);
+    Py_TRASHCAN_SAFE_END(self);
 }
 
 static PyObject *
@@ -442,11 +443,11 @@ Dataset_getItem(Dataset *self, int i){
 static PySequenceMethods Dataset_as_sequence = {
     (inquiry)Dataset_length,        /*sq_length*/
     (binaryfunc)0,					/*sq_concat*/
-    (intargfunc)0,					/*sq_repeat*/
-    (intargfunc)Dataset_getItem,					/*sq_item*/
-    (intintargfunc)0,				/*sq_slice*/
-    (intobjargproc)0,               /*sq_ass_item*/
-    (intintobjargproc)0,            /*sq_ass_slice*/
+    (ssizeargfunc)0,					/*sq_repeat*/
+    (ssizeargfunc)Dataset_getItem,					/*sq_item*/
+    (ssizessizeargfunc)0,				/*sq_slice*/
+    (ssizeobjargproc)0,               /*sq_ass_item*/
+    (ssizessizeobjargproc)0,            /*sq_ass_slice*/
 };
 
 

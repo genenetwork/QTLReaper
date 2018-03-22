@@ -250,11 +250,11 @@ Chromosome_getItem(Chromosome *self, int i){
 static PySequenceMethods Chromosome_as_sequence = {
 	(inquiry)Chromosome_length,        /*sq_length*/
 	(binaryfunc)0,					/*sq_concat*/
-	(intargfunc)0,					/*sq_repeat*/
-	(intargfunc)Chromosome_getItem,					/*sq_item*/
-	(intintargfunc)0,				/*sq_slice*/
-	(intobjargproc)0,               /*sq_ass_item*/
-	(intintobjargproc)0,            /*sq_ass_slice*/
+	(ssizeargfunc)0,					/*sq_repeat*/
+	(ssizeargfunc)Chromosome_getItem,					/*sq_item*/
+	(ssizessizeargfunc)0,				/*sq_slice*/
+	(ssizeobjargproc)0,               /*sq_ass_item*/
+	(ssizessizeobjargproc)0,            /*sq_ass_slice*/
 };
 
 

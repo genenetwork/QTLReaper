@@ -54,6 +54,7 @@ Alternatively check out the source tree and use a Guix environment
 
     guix environment bash -C --pure --ad-hoc gcc python --no-grafts
     python3 setup.py build
+    python3 setup.py install --user
 
 ## License
 
