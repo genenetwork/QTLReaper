@@ -167,7 +167,7 @@ QTL_compare(QTL * self, QTL * obj2){
 }
 
 PyTypeObject PyQTL_Type = {
-	PyObject_HEAD_INIT(NULL)
+  PyVarObject_HEAD_INIT(NULL,0)
 	0,                         /*ob_size*/
 	"QTL",             /*tp_name*/
 	sizeof(QTL),             /*tp_basicsize*/
@@ -176,8 +176,8 @@ PyTypeObject PyQTL_Type = {
 	0,                         /*tp_print*/
 	0,                         /*tp_getattr*/
 	0,                         /*tp_setattr*/
-	// (tp_richcompare)QTL_compare,		/*tp_compare*/
-	(reprfunc)QTL_repr,    /*tp_repr*/
+	QTL_compare,		   /*tp_compare*/
+	(reprfunc)QTL_repr,        /*tp_repr*/
 	0,                         /*tp_as_numbe&*/
 	0,                         /*tp_as_sequence*/
 	0,                         /*tp_as_mapping*/

@@ -452,7 +452,7 @@ static PySequenceMethods Dataset_as_sequence = {
 
 
 PyTypeObject PyDataset_Type = {
-    PyObject_HEAD_INIT(NULL)
+  PyVarObject_HEAD_INIT(NULL,0)
     0,                         /*ob_size*/
     "Dataset",             /*tp_name*/
     sizeof(Dataset),             /*tp_basicsize*/

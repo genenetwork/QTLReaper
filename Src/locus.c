@@ -319,7 +319,7 @@ static PySequenceMethods Locus_as_sequence = {
 
 
 PyTypeObject PyLocus_Type = {
-	PyObject_HEAD_INIT(NULL)
+        PyVarObject_HEAD_INIT(NULL,0)
 	0,						 /*ob_size*/
 	"Locus",			 /*tp_name*/
 	sizeof(Locus),			 /*tp_basicsize*/

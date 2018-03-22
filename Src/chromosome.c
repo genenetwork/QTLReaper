@@ -259,7 +259,7 @@ static PySequenceMethods Chromosome_as_sequence = {
 
 
 PyTypeObject PyChromosome_Type = {
-	PyObject_HEAD_INIT(NULL)
+  PyVarObject_HEAD_INIT(NULL,0)
 	0,                         /*ob_size*/
 	"Chromosome",             /*tp_name*/
 	sizeof(Chromosome),             /*tp_basicsize*/
