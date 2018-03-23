@@ -22,6 +22,7 @@
 #include "structmember.h"
 #include "geneobject.h"
 #include "regression.h"
+#include <assert.h>
 
 #define MAX_MARKERNAME_SIZE   256
 #define MAX_GENONAME_SIZE     256
@@ -42,8 +43,7 @@ static PyObject *Dataset_bootstrap(Dataset* self, PyObject *args, PyObject *keyw
 Start of Dataset Object
 ****************************/
 
-static int
-Dataset_traverse(Dataset *self, visitproc visit, void *arg)
+static int Dataset_traverse(Dataset *self, visitproc visit, void *arg)
 {
 	int i, err;
 	PyObject *x;
@@ -69,28 +69,25 @@ Dataset_traverse(Dataset *self, visitproc visit, void *arg)
     return 0;
 }
 
-
-
-static void
-Dataset_dealloc(Dataset* self)
+static void Dataset_dealloc(Dataset* self)
 {
     int i;
-	PyObject_GC_UnTrack(self);
-	Py_TRASHCAN_SAFE_BEGIN(self);
+    PyObject_GC_UnTrack(self);
+    Py_TRASHCAN_SAFE_BEGIN(self);
     Py_XDECREF(self->name);
 
     if (self->chromosome != NULL){
-    	for (i=0;i<self->size;i++){
-    		Py_XDECREF(self->chromosome[i]);
-    	}
-    	free(self->chromosome);
+      for (i=0;i<self->size;i++){
+        Py_XDECREF(self->chromosome[i]);
+      }
+      free(self->chromosome);
     }
 
     if (self->prgy != NULL){
-    	for (i=0;i<self->nprgy;i++){
-    		free(self->prgy[i]);
-    	}
-    	free(self->prgy);
+      for (i=0;i<self->nprgy;i++){
+        free(self->prgy[i]);
+      }
+      free(self->prgy);
     }
 
     PyObject *obj = (PyObject*)self;
@@ -98,8 +95,7 @@ Dataset_dealloc(Dataset* self)
     Py_TRASHCAN_SAFE_END(self);
 }
 
-static PyObject *
-Dataset_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+static PyObject * Dataset_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     Dataset *self;
 
@@ -128,8 +124,7 @@ Dataset_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     return (PyObject *)self;
 }
 
-static int
-Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
+static int Dataset_init(Dataset *self, PyObject *args, PyObject *kwds)
 {
     int i;
     PyObject *name=NULL, *chromosome=NULL, *temp;
@@ -589,36 +584,33 @@ Reaper_normp(PyObject *self, PyObject *args)
 
 
 static PyMethodDef Reaper_module_methods[] = {
-	{"pvalue", (PyCFunction)Reaper_pvalue,
-	METH_VARARGS, "Calculate p-value"},
-	{"anova", (PyCFunction)Reaper_anova,
-	METH_VARARGS, "Calculate p-value"},
-	{"normp", (PyCFunction)Reaper_normp,
-	METH_VARARGS, "Calculate normal distribution p-value"},
-	{NULL}  /* Sentinel */
+	{"pvalue", (PyCFunction)Reaper_pvalue, METH_VARARGS, "Calculate p-value"},
+	{"anova", (PyCFunction)Reaper_anova, METH_VARARGS, "Calculate p-value"},
+	{"normp", (PyCFunction)Reaper_normp, METH_VARARGS, "Calculate normal distribution p-value"},
+        {"error_out", (PyCFunction)error_out, METH_NOARGS, "Display an error"},
+	{NULL, NULL}
 };
+
+static PyObject *
+error_out(PyObject *m) {
+    struct module_state *st = GETSTATE(m);
+    PyErr_SetString(st->error, "something bad happened");
+    return NULL;
+}
 
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 
 #ifdef PY_MAJOR_VERSION >= 3
-extern PyObject *PyInit_myextension(void)
+extern PyObject *PyInit_reaper(void)
 #else
 PyMODINIT_FUNC initreaper(void)
 #endif
 {
-    PyObject* m;
+    fprintf(stderr,"Loading reaper...\n");
 
-    // valgrind: suggests a memory leak in the following lines (see also http://bugs.python.org/issue10156):
-    if (PyType_Ready(&PyDataset_Type) < 0)
-        return;
-    if (PyType_Ready(&PyChromosome_Type) < 0)
-        return;
-    if (PyType_Ready(&PyLocus_Type) < 0)
-        return;
-    if (PyType_Ready(&PyQTL_Type) < 0)
-        return;
+    PyObject* m;
 
 #if PY_MAJOR_VERSION >= 3
     static struct PyModuleDef moduledef = {
@@ -641,20 +633,35 @@ PyMODINIT_FUNC initreaper(void)
                        "QTL Reaper Module");
 #endif
 
+    if (m == NULL) {
+      PyErr_SetString(PyExc_SystemError,
+                      "reaper: init module load error");
+      return NULL;
+    }
 
+    // valgrind: suggests a memory leak in the following lines (see also http://bugs.python.org/issue10156):
 
-    if (m == NULL)
-      return;
-
+    /*
     Py_INCREF(&PyDataset_Type);
     Py_INCREF(&PyLocus_Type);
     Py_INCREF(&PyChromosome_Type);
     Py_INCREF(&PyQTL_Type);
+    */
 
-    PyModule_AddObject(m, "Dataset", (PyObject *)&PyDataset_Type);
-    PyModule_AddObject(m, "Locus", (PyObject *)&PyLocus_Type);
-    PyModule_AddObject(m, "Chromosome", (PyObject *)&PyChromosome_Type);
-    PyModule_AddObject(m, "QTL", (PyObject *)&PyQTL_Type);
+    // add objects to module
+    assert(PyModule_AddObject(m, "Dataset", (PyObject *)&PyDataset_Type) == 0);
+    assert(PyModule_AddObject(m, "Locus", (PyObject *)&PyLocus_Type) == 0);
+    assert(PyModule_AddObject(m, "Chromosome", (PyObject *)&PyChromosome_Type) == 0);
+    assert(PyModule_AddObject(m, "QTL", (PyObject *)&PyQTL_Type) == 0);
+
+    if (PyType_Ready(&PyDataset_Type) != 0 ||
+        PyType_Ready(&PyChromosome_Type) !=0 ||
+        PyType_Ready(&PyLocus_Type) != 0 ||
+        PyType_Ready(&PyQTL_Type) != 0) {
+      PyErr_SetString(PyExc_SystemError,
+                      "reaper: init2 module load error");
+      return NULL;
+    }
 
 #if PY_MAJOR_VERSION >= 3
     return m;

@@ -13,8 +13,9 @@ module1 = Extension('reaper',
                                "Src/blas_lite.c",
                                "Src/dlapack_lite.c",
                     ],
-                    extra_compile_args=["-Wfatal-errors", "-Werror=implicit-function-declaration"]
                     # extra_compile_args=["-Wfatal-errors", "-Werror"]
+                    extra_compile_args=["-g", "-O0", "-Wfatal-errors", "-Werror=implicit-function-declaration"],
+                    undef_macros=['NDEBUG'], # enable assertions!
 )
 
 setup(name='qtlreaper-gn2',

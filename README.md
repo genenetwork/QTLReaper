@@ -56,6 +56,20 @@ Alternatively check out the source tree and use a Guix environment
     python3 setup.py build
     python3 setup.py install --user
 
+## Debug
+
+Build the extension with
+
+    extra_compile_args=["-g", "-O0", "-Wfatal-errors", "-Werror=implicit-function-declaration"]
+
+in setup.by and start gdb with
+
+    gdb --args  python3 test/example1.py
+
+if you have built Python with symbol information add
+
+    symbol-file /gnu/store/97zc8nprz8sif91gbcz8jfsqk3mjx9i2-python-debug-3.5.3-debug/lib/debug/gnu/store/hkhfs...-debug-3.5.3/bin/python3.5.debug
+
 ## License
 
 The QTLReaper source code is released under the GNU General Public License version 2.0 (GPLv2). See [here](https://www.gnu.org/licenses/gpl-2.0.html).

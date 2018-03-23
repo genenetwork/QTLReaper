@@ -176,7 +176,7 @@ PyTypeObject PyQTL_Type = {
 	0,                         /*tp_print*/
 	0,                         /*tp_getattr*/
 	0,                         /*tp_setattr*/
-	QTL_compare,		   /*tp_compare*/
+	QTL_compare,		   /*cmpfunc, tp_compare*/
 	(reprfunc)QTL_repr,        /*tp_repr*/
 	0,                         /*tp_as_numbe&*/
 	0,                         /*tp_as_sequence*/
