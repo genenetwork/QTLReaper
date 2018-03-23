@@ -446,7 +446,6 @@ static PySequenceMethods Dataset_as_sequence = {
     (ssizessizeobjargproc)0,            /*sq_ass_slice*/
 };
 
-
 PyTypeObject PyDataset_Type = {
   PyVarObject_HEAD_INIT(NULL,0)
     0,                         /*ob_size*/
@@ -582,6 +581,23 @@ Reaper_normp(PyObject *self, PyObject *args)
 	return Py_BuildValue("d",pnorm1(x));
 }
 
+struct module_state {
+    PyObject *error;
+};
+
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
+
+static PyObject *error_out(PyObject *m) {
+    struct module_state *st = GETSTATE(m);
+    PyErr_SetString(st->error, "something bad happened");
+    return NULL;
+}
 
 static PyMethodDef Reaper_module_methods[] = {
 	{"pvalue", (PyCFunction)Reaper_pvalue, METH_VARARGS, "Calculate p-value"},
@@ -591,40 +607,47 @@ static PyMethodDef Reaper_module_methods[] = {
 	{NULL, NULL}
 };
 
-static PyObject *
-error_out(PyObject *m) {
-    struct module_state *st = GETSTATE(m);
-    PyErr_SetString(st->error, "something bad happened");
-    return NULL;
-}
-
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
 
 #ifdef PY_MAJOR_VERSION >= 3
-extern PyObject *PyInit_reaper(void)
+
+static int reaper_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int reaper_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+static struct PyModuleDef moduledef = {
+  PyModuleDef_HEAD_INIT,
+  "reaper",                    /* m_name */
+  "QTL Reaper Module",         /* m_doc */
+  sizeof(struct module_state), /* m_size */
+  Reaper_module_methods,       /* m_methods */
+  NULL,                        /* m_reload */
+  reaper_traverse,             /* m_traverse */
+  reaper_clear,                /* m_clear */
+  NULL,                        /* m_free */
+};
+
+#define INITERROR return NULL        // python-3
+PyMODINIT_FUNC PyInit_reaper(void) // python-3
 #else
-PyMODINIT_FUNC initreaper(void)
+
+#define INITERROR return             // python-2
+void initreaper(void)      // python-2
 #endif
 {
-    fprintf(stderr,"Loading reaper...\n");
+#ifdef PY_MAJOR_VERSION >= 3
+    fprintf(stderr,"Loading reaper3...\n");
+#else
+    fprintf(stderr,"Loading reaper2...\n");
+#endif
 
     PyObject* m;
 
-#if PY_MAJOR_VERSION >= 3
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "reaper",     /* m_name */
-        "QTL Reaper Module",  /* m_doc */
-        -1,                  /* m_size */
-        Reaper_module_methods, /* m_methods */
-        NULL,                /* m_reload */
-        NULL,                /* m_traverse */
-        NULL,                /* m_clear */
-        NULL,                /* m_free */
-    };
-#endif
 
 #if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&moduledef);
@@ -636,22 +659,27 @@ PyMODINIT_FUNC initreaper(void)
     if (m == NULL) {
       PyErr_SetString(PyExc_SystemError,
                       "reaper: init module load error");
-      return NULL;
+      INITERROR;
+    }
+
+    struct module_state *st = GETSTATE(m);
+
+    st->error = PyErr_NewException("myextension.Error", NULL, NULL);
+    if (st->error == NULL) {
+      Py_DECREF(m);
+      INITERROR;
     }
 
     // valgrind: suggests a memory leak in the following lines (see also http://bugs.python.org/issue10156):
 
-    /*
+    // add objects to module: this steals a reference to value, therefor incref first
     Py_INCREF(&PyDataset_Type);
-    Py_INCREF(&PyLocus_Type);
-    Py_INCREF(&PyChromosome_Type);
-    Py_INCREF(&PyQTL_Type);
-    */
-
-    // add objects to module
     assert(PyModule_AddObject(m, "Dataset", (PyObject *)&PyDataset_Type) == 0);
+    Py_INCREF(&PyLocus_Type);
     assert(PyModule_AddObject(m, "Locus", (PyObject *)&PyLocus_Type) == 0);
+    Py_INCREF(&PyChromosome_Type);
     assert(PyModule_AddObject(m, "Chromosome", (PyObject *)&PyChromosome_Type) == 0);
+    Py_INCREF(&PyQTL_Type);
     assert(PyModule_AddObject(m, "QTL", (PyObject *)&PyQTL_Type) == 0);
 
     if (PyType_Ready(&PyDataset_Type) != 0 ||
@@ -660,7 +688,7 @@ PyMODINIT_FUNC initreaper(void)
         PyType_Ready(&PyQTL_Type) != 0) {
       PyErr_SetString(PyExc_SystemError,
                       "reaper: init2 module load error");
-      return NULL;
+      INITERROR;
     }
 
 #if PY_MAJOR_VERSION >= 3
