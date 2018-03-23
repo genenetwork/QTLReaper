@@ -446,6 +446,41 @@ static PySequenceMethods Dataset_as_sequence = {
     (ssizessizeobjargproc)0,            /*sq_ass_slice*/
 };
 
+#if PY_MAJOR_VERSION >= 3
+
+
+typedef struct {
+    PyObject_HEAD
+    /* Type-specific fields go here. */
+} DatasetObject;
+
+PyTypeObject PyDataset_Type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "Dataset",                 /* tp_name */
+    sizeof(DatasetObject),     /* tp_basicsize */
+    0,                         /* tp_itemsize */
+    0,                         /* tp_dealloc */
+    0,                         /* tp_print */
+    0,                         /* tp_getattr */
+    0,                         /* tp_setattr */
+    0,                         /* tp_reserved */
+    0,                         /* tp_repr */
+    0,                         /* tp_as_number */
+    0,                         /* tp_as_sequence */
+    0,                         /* tp_as_mapping */
+    0,                         /* tp_hash  */
+    0,                         /* tp_call */
+    0,                         /* tp_str */
+    0,                         /* tp_getattro */
+    0,                         /* tp_setattro */
+    0,                         /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT,        /* tp_flags */
+    "Dataset objects",           /* tp_doc */
+};
+
+
+#else
+
 PyTypeObject PyDataset_Type = {
   PyVarObject_HEAD_INIT(NULL,0)
     0,                         /*ob_size*/
@@ -489,6 +524,7 @@ PyTypeObject PyDataset_Type = {
     Dataset_new,                 /* tp_new */
 };
 
+#endif
 
 
 /*Module Method*/

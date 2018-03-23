@@ -68,6 +68,7 @@ in setup.by and start gdb with
 
 if you have built Python with symbol information add
 
+    env PYTHONMALLOCSTATS=1 gdb --args  python3 test/example1.py
     symbol-file /gnu/store/97zc8nprz8sif91gbcz8jfsqk3mjx9i2-python-debug-3.5.3-debug/lib/debug/gnu/store/hkhfs...-debug-3.5.3/bin/python3.5.debug
 
 ## License
